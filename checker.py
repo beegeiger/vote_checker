@@ -30,6 +30,8 @@ def run_code(race_line, candidate_line, all_votes):
     print("1 - races from check races", races_only)
     races_with_info = check_rounds(races_only, candidate_line)
     print("2 - races from check_rounds", races_with_info)
+    race1 = prepare_race_data(races_with_info['Mayor - Oakland '], all_votes)
+    print("3 - race1 from prepare_race_data", race1[:10])
     return
 
 def check_races(race_line):
@@ -77,5 +79,22 @@ def check_rounds(races, candidate_line):
                 race_round_tracker.append([round_start_index, race_ind - 1])
                 round_start_index = race_ind              
     return races
+
+def prepare_race_data(race_from_races, all_votes):
+    """Outputs list where each element is a ballot and each element in a ballot list represents a round (which indexes correspond with candidates)"""
+    race_indexes = race_from_races[0]
+    candidates = race_from_races[1]
+    rounds_indexes = race_from_races[2]
+    all_ballots = []
+    for ind, whole_row in enumerate(all_votes):
+        race_row = whole_row[race_indexes[0]: race_indexes[1] + 1]
+        ballot = []
+        if race_row.count("0") + race_row.count("1") > (len(candidates) * 5) - 3:
+            for round_pair in rounds_indexes:
+                ballot.append(race_row[round_pair[0]: round_pair[1] + 1])
+            all_ballots.append(ballot)
+    return all_ballots
+
+
 
 run_code(race_line, candidate_line, all_votes)
