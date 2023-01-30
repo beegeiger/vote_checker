@@ -68,14 +68,11 @@ def check_rounds(races, candidate_line):
         round_start_index = 9999
         race_round_tracker = []
         for race_ind, cand_cell in enumerate(race_data):
-            print("TEST 0", candidate_list, race_ind, len(race_data) - 1)
             cand = cand_cell.split("(")[0]
-            print("CAND = ", cand)
             if cand not in candidate_list:
                 candidate_list.append(cand)
-                print("CANDIDATE LIST: ", candidate_list)
                 if len(candidate_list) == 1:
-                    round_start_index = 0
+                    round_start_index = race_ind
             elif cand == candidate_list[0]:
                 print("TEST 1", cand, candidate_list, race_round_tracker)
                 race_round_tracker.append([round_start_index, race_ind - 1])
