@@ -59,29 +59,29 @@ def check_races(race_line):
 
 def check_rounds(races, candidate_line):
     """Outputs races = {"race1": [["first index of race", "last index of race"],[cand1, cand2, etc.],[[round1_start_ind, round1_end_ind], [round2_start_ind, round_2_end_ind], etc.]]}"""
-    for overall_ind,race in enumerate(races):
+    race_num = 0
+    for race in races:
+        race_num += 1
+        # print("RACE NUMBER: ", race_num, race, races)
         start_ind = races[race][0]
         last_ind = races[race][1]
         race_data = candidate_line[start_ind: last_ind + 1]
         round_break = []
         candidate_list = []
-        round_start_index = 9999
+        round_start_index = 0
         race_round_tracker = []
         for race_ind, cand_cell in enumerate(race_data):
+            # print("CANDIDATE LIST: ", candidate_list)
             cand = cand_cell.split("(")[0]
             if cand not in candidate_list:
                 candidate_list.append(cand)
-                if len(candidate_list) == 1:
-                    round_start_index = race_ind
             elif cand == candidate_list[0]:
-                print("TEST 1", cand, candidate_list, race_round_tracker)
                 race_round_tracker.append([round_start_index, race_ind - 1])
-                print("TEST 1A", race_round_tracker)
+                round_start_index = race_ind
             elif race_ind == len(race_data) - 1:
-                print("TEST 2")
                 race_round_tracker.append([round_start_index, race_ind])
                 races[race] = [races[race], candidate_list, race_round_tracker]
-        print("A2 - races IN check_rounds", races)        
-        return races
+        # print("A2 - races IN check_rounds", races)        
+    return races
 
 run_code(race_line, candidate_line, all_votes)
