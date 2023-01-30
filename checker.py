@@ -4,18 +4,30 @@ race_line =[]
 candidate_line =[]
 all_votes = []
 
-with open('votes.csv') as csv_file:
+with open('test_data.txt') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
     line_count = 0
-    for row in csv_reader:
-        if line_count = 0:
+    for row_raw in csv_reader:
+        row = row_raw[9:]
+        # if line_count < 10:
+        #     print(line_count, row)
+        if line_count == 0:
             race_line = row
-        elif line_count = 1:
+        elif line_count == 1:
             candidate_line = row
         else:
             all_votes.append(row) 
+        line_count += 1
 
 input = [race_line, candidate_line, all_votes]
+
+
+def run_code(race_line, candidate_line, all_votes):
+    races_only = check_races(race_line)
+    print("1 - races from check races", races_only)
+    races_with_info = check_rounds(races_only, candidate_line)
+    print("2 - races from check_rounds", races_with_info)
+    return
 
 def check_races(race_line):
     """Outputs Dictionary where races["specific race"] = ["first index of race", "last index of race"] from race_line list"""
@@ -26,15 +38,21 @@ def check_races(race_line):
         cell = column.split("(RCV)")
         race = cell[0]
         if race != current_race:
-            if len(races)==0:
+            if current_race=="":
+                # print("A IF activated!", races, start_index, current_race, type(current_race), race)
                 current_race = race
                 start_index = ind
             elif ind == len(race_line) - 1:
-                races[curent_race] = [start_index, ind]
+                # print("B IF activated!", races, start_index, current_race, race)
+                races[current_race] = [start_index, ind]
             else:
-                races[curent_race] = [start_index, ind - 1]
-                current_race = races
+                # print("C IF activated!", races, start_index, current_race, race)
+                races[current_race] = [start_index, ind - 1]
+                current_race = race
                 start_index = ind
+
+            
+    # print("A1 - races IN check_races", races)
     return races
 
 
@@ -50,14 +68,23 @@ def check_rounds(races, candidate_line):
         round_start_index = 9999
         race_round_tracker = []
         for race_ind, cand_cell in enumerate(race_data):
+            print("TEST 0", candidate_list, race_ind, len(race_data) - 1)
             cand = cand_cell.split("(")[0]
+            print("CAND = ", cand)
             if cand not in candidate_list:
-                candidate_list += cand
+                candidate_list.append(cand)
+                print("CANDIDATE LIST: ", candidate_list)
                 if len(candidate_list) == 1:
                     round_start_index = 0
             elif cand == candidate_list[0]:
+                print("TEST 1", cand, candidate_list, race_round_tracker)
                 race_round_tracker.append([round_start_index, race_ind - 1])
+                print("TEST 1A", race_round_tracker)
             elif race_ind == len(race_data) - 1:
+                print("TEST 2")
                 race_round_tracker.append([round_start_index, race_ind])
                 races[race] = [races[race], candidate_list, race_round_tracker]
+        print("A2 - races IN check_rounds", races)        
         return races
+
+run_code(race_line, candidate_line, all_votes)
