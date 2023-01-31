@@ -95,6 +95,42 @@ def prepare_race_data(race_from_races, all_votes):
             all_ballots.append(ballot)
     return all_ballots
 
+def sum_round(race_from_races, race_votes):
+    race_indexes = race_from_races[0]
+    candidates = race_from_races[1]
+    categories = list(candidates) + ["Blanks", "Exhausted", "Overvote"]
+    vote_tracker = []
+    ballot_tracker = []
+    for cat in categories:
+        vote_tracker.append(0)
+    for ballot in race_votes:
+        blank_tracker = 0
+        ballot_counted = False
+        current_ballot = list(ballot)
+        if ballot == ["BLANK"]:
+            vote_tracker[-3] += 1
+        elif ballot == ["EXHAUSTED"]:
+            vote_tracker[-2] += 1
+        elif ballot == ["OVERVOTE"]:
+            vote_tracker[-1] += 1
+        else:
+            while ballot_counted == False:
+                if current_ballot == []:
+                    if blank_tracker == 5:
+                        vote_tracker[-3] += 1
+                        vote_tracker.append(["BLANK"])
+                        ballot_counted = True
+                    else:    
+                        vote_tracker[-2] += 1
+                        vote_tracker.append(["EXHAUSTED"])
+                        ballot_counted = True
+                elif current_ballot[0].count("1") > 1:
+                    vote_tracker[-1] += 1
+                    vote_tracker.append(["OVERVOTE"])
+                    ballot_counted = True
+
+
+
 
 
 run_code(race_line, candidate_line, all_votes)
