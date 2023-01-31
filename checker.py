@@ -95,12 +95,15 @@ def prepare_race_data(race_from_races, all_votes):
             all_ballots.append(ballot)
     return all_ballots
 
-def sum_round(race_from_races, race_votes):
+def sum_round(race_from_races, race_votes, elimination_tracker =[]):
     race_indexes = race_from_races[0]
     candidates = race_from_races[1]
     categories = list(candidates) + ["Blanks", "Exhausted", "Overvote"]
     vote_tracker = []
-    ballot_tracker = []
+    ballot_tracker = [] 
+    if elimination_tracker == []:
+        for cat in categories:
+            elimination_tracker.append("Y")
     for cat in categories:
         vote_tracker.append(0)
     for ballot in race_votes:
@@ -116,7 +119,7 @@ def sum_round(race_from_races, race_votes):
         else:
             while ballot_counted == False:
                 if current_ballot == []:
-                    if blank_tracker == 5:
+                    if blank_tracker == len(ballot):
                         vote_tracker[-3] += 1
                         vote_tracker.append(["BLANK"])
                         ballot_counted = True
@@ -128,7 +131,11 @@ def sum_round(race_from_races, race_votes):
                     vote_tracker[-1] += 1
                     vote_tracker.append(["OVERVOTE"])
                     ballot_counted = True
-
+                elif current_ballot[0].count("1") == 0:
+                    blank_tracker += 1
+                    current_ballot = list(ballot[1:])
+                else:
+                    
 
 
 
