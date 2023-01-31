@@ -96,6 +96,7 @@ def prepare_race_data(race_from_races, all_votes):
     return all_ballots
 
 def sum_round(race_from_races, race_votes, elimination_tracker =[]):
+    """Outputs [[len(race_votes), sum(vote_tracker)],categories, vote_tracker, elimination_tracker, ballot_tracker]"""
     race_indexes = race_from_races[0]
     candidates = race_from_races[1]
     categories = list(candidates) + ["Blanks", "Exhausted", "Overvote"]
@@ -103,7 +104,7 @@ def sum_round(race_from_races, race_votes, elimination_tracker =[]):
     ballot_tracker = [] 
     if elimination_tracker == []:
         for cat in categories:
-            elimination_tracker.append("Y")
+            elimination_tracker.append("I")
     for cat in categories:
         vote_tracker.append(0)
     for ballot in race_votes:
@@ -121,21 +122,27 @@ def sum_round(race_from_races, race_votes, elimination_tracker =[]):
                 if current_ballot == []:
                     if blank_tracker == len(ballot):
                         vote_tracker[-3] += 1
-                        vote_tracker.append(["BLANK"])
+                        ballot_tracker.append(["BLANK"])
                         ballot_counted = True
                     else:    
                         vote_tracker[-2] += 1
-                        vote_tracker.append(["EXHAUSTED"])
+                        ballot_tracker.append(["EXHAUSTED"])
                         ballot_counted = True
                 elif current_ballot[0].count("1") > 1:
                     vote_tracker[-1] += 1
-                    vote_tracker.append(["OVERVOTE"])
+                    ballot_tracker.append(["OVERVOTE"])
                     ballot_counted = True
                 elif current_ballot[0].count("1") == 0:
                     blank_tracker += 1
                     current_ballot = list(ballot[1:])
                 else:
-                    
+                    vote_index = current_ballot[0].index("1")
+                    if elimination_tracker[vote_index] != "x":
+                        vote_tracker[vote_index] += 1
+                        ballot_tracker.append(current_ballot)
+                        ballot_counted = True
+        return [[len(race_votes), sum(vote_tracker)],categories, vote_tracker, elimination_tracker, ballot_tracker]
+
 
 
 
