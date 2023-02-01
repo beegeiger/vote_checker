@@ -115,7 +115,6 @@ def sum_round(race_from_races, race_votes, round_no = 0, categories = [], elimin
     ballot_no = 0
     for ballot in race_votes:
         ballot_no += 1
-        print("Processing Ballot " + str(ballot_no) + " of " + str(len(race_votes)))
         blank_tracker = 0
         ballot_counted = False
         current_ballot = list(ballot)
@@ -129,29 +128,23 @@ def sum_round(race_from_races, race_votes, round_no = 0, categories = [], elimin
             while ballot_counted == False:
                 if current_ballot == []:
                     if blank_tracker == len(ballot):
-                        print("TRIGGER 1")
                         vote_tracker[-3] += 1
                         ballot_tracker.append(["BLANK"])
                         ballot_counted = True
                     else:
-                        print("TRIGGER 2")  
                         vote_tracker[-2] += 1
                         ballot_tracker.append(["EXHAUSTED"])
                         ballot_counted = True
                 elif current_ballot[0].count("1") > 1:
-                    print("TRIGGER 3")
                     vote_tracker[-1] += 1
                     ballot_tracker.append(["OVERVOTE"])
                     ballot_counted = True
                 elif current_ballot[0].count("1") == 0:
                     blank_tracker += 1
-                    current_ballot = list(ballot[1:])
-                    print("TRIGGER 4", blank_tracker, ballot[1:])
+                    current_ballot = current_ballot[1:]
                 else:
-                    print("TRIGGER 5")
                     vote_index = current_ballot[0].index("1")
                     if elimination_tracker[vote_index] != "x":
-                        print("TRIGGER 6")
                         vote_tracker[vote_index] += 1
                         ballot_tracker.append(current_ballot)
                         ballot_counted = True
@@ -159,7 +152,10 @@ def sum_round(race_from_races, race_votes, round_no = 0, categories = [], elimin
     return [race_from_races, ballot_tracker, round_no, categories, elimination_tracker, vote_tracker]
 
 
-
+def round_elim([race_from_races, ballot_tracker, round_no, categories, elimination_tracker, vote_tracker]):
+    sorted_vote_tracker = list(vote_tracker[:-3]).sort()
+    lowest_count_ind = vote_tracker.find(sorted_vote_tracker[0])
+    tb_eliminated = categories[lowest_count_ind]
 
 
 run_code(race_line, candidate_line, all_votes)
