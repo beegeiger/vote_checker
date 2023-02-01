@@ -3,7 +3,7 @@ import csv
 race_line =[]
 candidate_line =[]
 all_votes = []
-
+entire_report = []
 with open('test_data.txt') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
     line_count = 0
@@ -14,6 +14,7 @@ with open('test_data.txt') as csv_file:
                 if element == "BallotType":
                     start_index = ind2 + 2
         row = row_raw[start_index:]
+        entire_report.append(row_raw)
         if line_count == 0:
             race_line = row
         elif line_count == 1:
@@ -32,6 +33,8 @@ def run_code(race_line, candidate_line, all_votes):
     print("2 - races from check_rounds", races_with_info)
     race1 = prepare_race_data(races_with_info['Mayor - Oakland '], all_votes)
     print("3 - race1 from prepare_race_data", race1[:10])
+    summed_round = sum_round(races_with_info['Mayor - Oakland '], race1)
+    print("4 - summed_round from sum_round", summed_round[2:])
     return
 
 def check_races(race_line):
@@ -95,11 +98,13 @@ def prepare_race_data(race_from_races, all_votes):
             all_ballots.append(ballot)
     return all_ballots
 
-def sum_round(race_from_races, race_votes, elimination_tracker =[]):
-    """Outputs [[len(race_votes), sum(vote_tracker)],categories, vote_tracker, elimination_tracker, ballot_tracker]"""
+def sum_round(race_from_races, race_votes, round_no = 0, categories = [], elimination_tracker =[]):
+    """Outputs [race_from_races, ballot_tracker, round_no, categories, elimination_tracker, vote_tracker]"""
     race_indexes = race_from_races[0]
     candidates = race_from_races[1]
-    categories = list(candidates) + ["Blanks", "Exhausted", "Overvote"]
+    if categories == []:
+        categories = list(candidates) + ["Blanks", "Exhausted", "Overvote"]
+    round_no += 1
     vote_tracker = []
     ballot_tracker = [] 
     if elimination_tracker == []:
@@ -141,7 +146,8 @@ def sum_round(race_from_races, race_votes, elimination_tracker =[]):
                         vote_tracker[vote_index] += 1
                         ballot_tracker.append(current_ballot)
                         ballot_counted = True
-        return [[len(race_votes), sum(vote_tracker)],categories, vote_tracker, elimination_tracker, ballot_tracker]
+        print(str(len(race_votes)) + " Ballots Entered. " + str(sum(vote_tracker)) + "Votes Counted.")
+        return [race_from_races, ballot_tracker, round_no, categories, elimination_tracker, vote_tracker]
 
 
 
