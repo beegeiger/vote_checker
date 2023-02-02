@@ -3,7 +3,10 @@ import csv
 race_line =[]
 candidate_line =[]
 all_votes = []
-entire_report = []
+entire_report_import = []
+
+export_report = []
+
 with open('test_data.txt') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
     line_count = 0
@@ -14,7 +17,7 @@ with open('test_data.txt') as csv_file:
                 if element == "BallotType":
                     start_index = ind2 + 2
         row = row_raw[start_index:]
-        entire_report.append(row_raw)
+        entire_report_import.append(row_raw)
         if line_count == 0:
             race_line = row
         elif line_count == 1:
@@ -28,13 +31,15 @@ input = [race_line, candidate_line, all_votes]
 
 def run_code(race_line, candidate_line, all_votes):
     races_only = check_races(race_line)
-    print("1 - races from check races", races_only)
+    print("1 - races from check races: ", races_only)
     races_with_info = check_rounds(races_only, candidate_line)
-    print("2 - races from check_rounds", races_with_info)
+    print("2 - races from check_rounds: ", races_with_info)
     race1 = prepare_race_data(races_with_info['Mayor - Oakland '], all_votes)
-    print("3 - race1 from prepare_race_data", race1[:10])
+    print("3 - race1 from prepare_race_data: ", race1[:10])
     summed_round = sum_round(races_with_info['Mayor - Oakland '], race1)
-    print("4 - summed_round from sum_round", summed_round[2:])
+    print("4 - summed_round from sum_round: ", summed_round[2:])
+    post_elimination_round = round_elim(summed_round[1], summed_round[2], summed_round[3], summed_round[4], summed_round[5])
+    print("5 - round after elimination: ", post_elimination_round[1:])
     return
 
 def check_races(race_line):
@@ -152,10 +157,47 @@ def sum_round(race_from_races, race_votes, round_no = 0, categories = [], elimin
     return [race_from_races, ballot_tracker, round_no, categories, elimination_tracker, vote_tracker]
 
 
-def round_elim([race_from_races, ballot_tracker, round_no, categories, elimination_tracker, vote_tracker]):
-    sorted_vote_tracker = list(vote_tracker[:-3]).sort()
-    lowest_count_ind = vote_tracker.find(sorted_vote_tracker[0])
+def round_elim(ballot_tracker, round_no, categories, elimination_tracker, vote_tracker):
+    sorted_vote_tracker = list(vote_tracker[:-3])
+    sorted_vote_tracker.sort()
+    lowest_count_ind = vote_tracker.index(sorted_vote_tracker[0])
     tb_eliminated = categories[lowest_count_ind]
+    elimination_tracker[lowest_count_ind] = "x"
+    where_elim_go = []
+    for n in categories:
+        where_elim_go.append(0)
+    new_ballot_tracker = []
+    no_of_elimated_ballots = 0
+    ballot_no = 0
+    for ballot in ballot_tracker:
+        ballot_no += 1
+        if ballot == ["EXHAUSTED"] or ballot == ["OVERVOTE"] or ballot == ["BLANK"]:
+            new_ballot_tracker.append(ballot)
+        elif ballot[0][lowest_count_ind] == "1" and ballot[0].count("1") == 1:
+            current_ballot = ballot[1:]
+            ballot_counted = False
+            while ballot_counted == False:
+                if current_ballot == []:
+                    where_elim_go[-2] += 1
+                    new_ballot_tracker.append(["EXHAUSTED"])
+                    ballot_counted = True
+                elif current_ballot[0].count("1") > 1:
+                    where_elim_go[-1] += 1
+                    new_ballot_tracker.append(["OVERVOTE"])
+                    ballot_counted = True
+                elif current_ballot[0].count("1") == 0:
+                    current_ballot = current_ballot[1:]
+                else:
+                    vote_index = current_ballot[0].index("1")
+                    if elimination_tracker[vote_index] != "x":
+                        where_elim_go[vote_index] += 1
+                        new_ballot_tracker.append(current_ballot)
+                        ballot_counted = True
+                    else:
+                        current_ballot = current_ballot[1:]
+        else:
+            new_ballot_tracker.append(ballot)
+    return [new_ballot_tracker, round_no, categories, elimination_tracker, where_elim_go]
 
 
 run_code(race_line, candidate_line, all_votes)
