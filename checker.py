@@ -28,6 +28,21 @@ with open('test_data.txt') as csv_file:
 
 input = [race_line, candidate_line, all_votes]
 
+def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, export_report, subset_type = [], subset_values = [], exhaust_suspended = False):
+    races_only = check_races(race_line)
+    races_with_info = check_rounds(races_only, candidate_line)
+    for race in races_only:
+        race_from_races = races_with_info[race]
+        race_ballots = prepare_race_data(race_from_races, all_votes)
+        run_rcv_for_one_race_sample(race_from_races, race_ballots)
+    return export_report
+
+
+
+def run_rcv_for_one_race_sample():
+    return
+
+
 
 def run_code(race_line, candidate_line, all_votes):
     races_only = check_races(race_line)
