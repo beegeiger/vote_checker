@@ -4,6 +4,8 @@ race_line =[]
 candidate_line =[]
 all_votes = []
 entire_report_import = []
+#ballot_info = [[ballot_id1, precinct1, ballot_batch1], [ballot_id2, precinct2, ballot_batch2]]
+ballot_info = []
 
 export_report = []
 
@@ -23,6 +25,8 @@ with open('test_data.txt') as csv_file:
         elif line_count == 1:
             candidate_line = row
         else:
+            ballot_id_split = row_raw[4].split["-"]
+            ballot_info.append[[row_raw[4]], row_raw[6], (ballot_id_split[0] + "-" + ballot_id_split[1])]
             all_votes.append(row) 
         line_count += 1
 
@@ -46,11 +50,12 @@ def run_rcv_for_one_race_sample(race_from_races, race_ballots, qualified_write_i
     while rounds_complete == False:
         summed_round = sum_round(race_from_races, race_ballots)
         if loop_no == 0:
-            export_report.append([""] + summed_round[3] + ["", ""] + summed_round[3] + ["", ""] + summed_round[3])
+            export_report.append(["","", "Total Votes", "Round"] + summed_round[3] + ["", "Candidates Eliminated"] + summed_round[3] + ["", "Where Elimated Candidates Votes Go"] + summed_round[3])
         if loop_no == 0 and qualified_write_in == False:
             post_elimination_round = round_elim(summed_round[1], summed_round[2], summed_round[3], summed_round[4], summed_round[5], True)
         else:
             post_elimination_round = round_elim(summed_round[1], summed_round[2], summed_round[3], summed_round[4], summed_round[5])
+        export_report.append(["", "", "", loop_no,] + summed_round[5] + ["",""] + post_elimination_round[4] + ["",""] post_elimination_round[3])
         loop_no += 1
     return sample_report
 
@@ -92,7 +97,7 @@ def check_races(race_line):
 
 
 def check_rounds(races, candidate_line):
-    """Outputs races = {"race1": [["first index of race", "last index of race"],[cand1, cand2, etc.],[[round1_start_ind, round1_end_ind], [round2_start_ind, round_2_end_ind], etc.]]}"""
+    """Outputs races = {"race1": [["first index of race", "last index of race"],[cand1, cand2, etc.],[[round1_start_ind, round1_end_ind], [round2_start_ind, round_2_end_ind], etc.],]}"""
     race_num = 0
     for race in races:
         race_num += 1
