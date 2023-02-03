@@ -28,19 +28,29 @@ with open('test_data.txt') as csv_file:
 
 input = [race_line, candidate_line, all_votes]
 
-def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, export_report, subset_type = [], subset_values = [], exhaust_suspended = False):
+def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, export_report, subset_type = [],subset_values = [],  qualified_write_in=False, exhaust_suspended = False):
     races_only = check_races(race_line)
     races_with_info = check_rounds(races_only, candidate_line)
     for race in races_only:
         race_from_races = races_with_info[race]
         race_ballots = prepare_race_data(race_from_races, all_votes)
-        run_rcv_for_one_race_sample(race_from_races, race_ballots)
+        run_rcv_for_one_race_sample(race_from_races, race_ballots, qualified_write_in)
     return export_report
 
 
 
-def run_rcv_for_one_race_sample():
-    return
+def run_rcv_for_one_race_sample(race_from_races, race_ballots, qualified_write_in):
+    sample_report = []
+    all_rounds_complete = False
+    loop_no = 0
+    while rounds_complete == False:
+        summed_round = sum_round(race_from_races, race_ballots)
+        if loop_no == 0 and qualified_write_in == False:
+            post_elimination_round = round_elim(summed_round[1], summed_round[2], summed_round[3], summed_round[4], summed_round[5], True)
+        else:
+            post_elimination_round = round_elim(summed_round[1], summed_round[2], summed_round[3], summed_round[4], summed_round[5])
+        loop_no += 1
+    return sample_report
 
 
 
@@ -49,9 +59,9 @@ def run_code(race_line, candidate_line, all_votes):
     print("1 - races from check races: ", races_only)
     races_with_info = check_rounds(races_only, candidate_line)
     print("2 - races from check_rounds: ", races_with_info)
-    race1 = prepare_race_data(races_with_info['Mayor - Oakland '], all_votes)
+    race1_ballots = prepare_race_data(races_with_info['Mayor - Oakland '], all_votes)
     print("3 - race1 from prepare_race_data: ", race1[:10])
-    summed_round = sum_round(races_with_info['Mayor - Oakland '], race1)
+    summed_round = sum_round(races_with_info['Mayor - Oakland '], race1_ballots)
     print("4 - summed_round from sum_round: ", summed_round[2:])
     post_elimination_round = round_elim(summed_round[1], summed_round[2], summed_round[3], summed_round[4], summed_round[5])
     print("5 - round after elimination: ", post_elimination_round[1:])
@@ -118,7 +128,7 @@ def prepare_race_data(race_from_races, all_votes):
             all_ballots.append(ballot)
     return all_ballots
 
-def sum_round(race_from_races, race_votes, round_no = 0, categories = [], elimination_tracker =[]):
+def sum_round(race_from_races, race_votes, round_no = -1, categories = [], elimination_tracker =[]):
     """Outputs [race_from_races, ballot_tracker, round_no, categories, elimination_tracker, vote_tracker]"""
     race_indexes = race_from_races[0]
     candidates = race_from_races[1]
@@ -172,12 +182,19 @@ def sum_round(race_from_races, race_votes, round_no = 0, categories = [], elimin
     return [race_from_races, ballot_tracker, round_no, categories, elimination_tracker, vote_tracker]
 
 
-def round_elim(ballot_tracker, round_no, categories, elimination_tracker, vote_tracker):
-    sorted_vote_tracker = list(vote_tracker[:-3])
-    sorted_vote_tracker.sort()
-    lowest_count_ind = vote_tracker.index(sorted_vote_tracker[0])
-    tb_eliminated = categories[lowest_count_ind]
-    elimination_tracker[lowest_count_ind] = "x"
+def round_elim(ballot_tracker, round_no, categories, elimination_tracker, vote_tracker, round_0_no_write_in = False):
+    elim_index = 0
+    if round_0_no_write_in == False:
+        sorted_vote_tracker = list(vote_tracker[:-3])
+        sorted_vote_tracker.sort()
+        lowest_count_ind = vote_tracker.index(sorted_vote_tracker[0])
+        tb_eliminated = categories[lowest_count_ind]
+        elimination_tracker[lowest_count_ind] = "x"
+        elim_index = lowest_count_ind
+    else:
+        write_in_index = categories.index("Write-in")
+        elimination_tracker[write_in_index] = "x"
+        elim_index = write_in_index
     where_elim_go = []
     for n in categories:
         where_elim_go.append(0)
@@ -188,7 +205,7 @@ def round_elim(ballot_tracker, round_no, categories, elimination_tracker, vote_t
         ballot_no += 1
         if ballot == ["EXHAUSTED"] or ballot == ["OVERVOTE"] or ballot == ["BLANK"]:
             new_ballot_tracker.append(ballot)
-        elif ballot[0][lowest_count_ind] == "1" and ballot[0].count("1") == 1:
+        elif ballot[0][elim_index] == "1" and ballot[0].count("1") == 1:
             current_ballot = ballot[1:]
             ballot_counted = False
             while ballot_counted == False:
