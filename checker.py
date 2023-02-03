@@ -45,6 +45,8 @@ def run_rcv_for_one_race_sample(race_from_races, race_ballots, qualified_write_i
     loop_no = 0
     while rounds_complete == False:
         summed_round = sum_round(race_from_races, race_ballots)
+        if loop_no == 0:
+            export_report.append([""] + summed_round[3] + ["", ""] + summed_round[3] + ["", ""] + summed_round[3])
         if loop_no == 0 and qualified_write_in == False:
             post_elimination_round = round_elim(summed_round[1], summed_round[2], summed_round[3], summed_round[4], summed_round[5], True)
         else:
@@ -233,3 +235,10 @@ def round_elim(ballot_tracker, round_no, categories, elimination_tracker, vote_t
 
 
 run_code(race_line, candidate_line, all_votes)
+
+output_file_name = "RCV_Report"
+
+with open(output_file_name, 'w') as f:
+    # using csv.writer method from CSV package
+    write = csv.writer(f)
+    write.writerows(export_report)
