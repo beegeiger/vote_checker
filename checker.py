@@ -48,15 +48,24 @@ def run_rcv_for_one_race_sample(race_from_races, race_ballots, qualified_write_i
     all_rounds_complete = False
     loop_no = 0
     while rounds_complete == False:
+        post_elimination_round = []  
         summed_round = sum_round(race_from_races, race_ballots)
+        if len(post_elimination_round) > 2:
+            if post_elimination_round[3][:-3].count("I") <= 2:
+                export_report.append(["", "","FINAL ROUND: ", loop_no] + summed_round[5] + ["","", loop_no] + post_elimination_round[4])
+                highest_vote_count = summed_round[5].max()
+                highest_vote_index = summed_round[5].index(highest_vote_count)
+                export_report.append(["WINNER: ", summed_round[3][highest_vote_index],"FINAL ROUND: ", loop_no] + summed_round[5] + ["","", loop_no] + post_elimination_round[4])
         if loop_no == 0:
-            export_report.append(["","", "Total Votes", "Round"] + summed_round[3] + ["", "Candidates Eliminated"] + summed_round[3] + ["", "Where Elimated Candidates Votes Go"] + summed_round[3])
+            export_report.append(["","", "Total Votes", "Round"] + summed_round[3] + ["", "Candidates Eliminated", "Round"] + summed_round[3] + ["", "Where Elimated Candidates Votes Go", "Round"] + summed_round[3])
         if loop_no == 0 and qualified_write_in == False:
             post_elimination_round = round_elim(summed_round[1], summed_round[2], summed_round[3], summed_round[4], summed_round[5], True)
         else:
             post_elimination_round = round_elim(summed_round[1], summed_round[2], summed_round[3], summed_round[4], summed_round[5])
-        export_report.append(["", "", "", loop_no,] + summed_round[5] + ["",""] + post_elimination_round[4] + ["",""] post_elimination_round[3])
+        export_report.append(["", "", "", loop_no] + summed_round[5] + ["","", loop_no] + post_elimination_round[4] + ["","", loop_no] post_elimination_round[3])
         loop_no += 1
+    export_report.append([])
+
     return sample_report
 
 
