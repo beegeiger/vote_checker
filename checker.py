@@ -188,13 +188,14 @@ def prepare_race_data(race_from_races, all_votes):
     rounds_indexes = race_from_races[2]
     all_ballots = []
     for ind, whole_row_info in enumerate(all_votes):
+        ballot_info = whole_row_info[0]
         whole_row = whole_row_info[1]
         race_row = whole_row[race_indexes[0]: race_indexes[1] + 1]
         ballot = []
         if race_row.count("0") + race_row.count("1") > (len(candidates) * 5) - 3:
             for round_pair in rounds_indexes:
                 ballot.append(race_row[round_pair[0]: round_pair[1] + 1])
-            all_ballots.append(ballot)
+            all_ballots.append([ballot_info, ballot])
     return all_ballots
 
 def sum_round(race_from_races, race_votes, round_no = -1, categories = [], elimination_tracker =[]):
@@ -219,7 +220,8 @@ def sum_round(race_from_races, race_votes, round_no = -1, categories = [], elimi
         vote_tracker.append(0)
     ballot_no = 0
     print("TRIGGER 1006")
-    for ballot in race_votes:
+    for ballot_all in race_votes:
+        ballot = ballot_all[1]
         print("TRIGGER 1006.1", ballot)
         ballot_no += 1
         blank_tracker = 0
@@ -294,7 +296,8 @@ def round_elim(ballot_tracker, round_no, categories, elimination_tracker, vote_t
     new_ballot_tracker = []
     no_of_elimated_ballots = 0
     ballot_no = 0
-    for ballot in ballot_tracker:
+    for ballot_all in ballot_tracker:
+        ballot = ballot_all[1]
         ballot_no += 1
         if ballot == ["EXHAUSTED"] or ballot == ["OVERVOTE"] or ballot == ["BLANK"]:
             new_ballot_tracker.append(ballot)
