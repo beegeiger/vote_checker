@@ -6,6 +6,9 @@ all_votes = []
 entire_report_import = []
 #ballot_info = [[ballot_id1, precinct1, ballot_batch1], [ballot_id2, precinct2, ballot_batch2]]
 ballot_info = []
+all_races = []
+all_precincts = []
+all_batches = []
 
 export_report = []
 
@@ -26,28 +29,41 @@ with open('test_data.txt') as csv_file:
             candidate_line = row
         elif line_count > 2 and row_raw[7] != "TOTAL":
             ballot_id_split = row_raw[4].split("-")
-            ballot_info.append([[row_raw[4]], row_raw[6], (ballot_id_split[0] + "-" + ballot_id_split[1])])
-            all_votes.append(row) 
+            batch = (ballot_id_split[0] + "-" + ballot_id_split[1])
+            ballot_info.append([row_raw[4], row_raw[6], batch])
+            if raw_row[4] not in all_races:
+                all_races.append(raw_row[4])
+            if raw_row[6] not in all_precincts:
+                all_precincts.append(raw_row[6])
+            if batch not in all_batches:
+                all_batches.append(batch)
+            all_votes.append([row_raw[4], row_raw[6], batch], row)
         line_count += 1
 
 input = [race_line, candidate_line, all_votes]
 
-def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, export_report):
+def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, export_report, report_grouping):
     races_only = check_races(race_line)
     races_with_info = check_rounds(races_only, candidate_line)
+    precinct_grouping = report_grouping[1]
+    batch_grouping = report_grouping[2]
     for race in races_only:
-        print("NEW RACE FROM RUN ENTIRE REPORT: ", race)
-        race_from_races = races_with_info[race]
-        print("TRIGGER X")
-        race_ballots = prepare_race_data(race_from_races, all_votes)
-        print("TRIGGER Y")
-        run_rcv_for_one_race_sample(race_from_races, race_ballots)
-        print("TRIGGER Z")
+        if precinct_grouping == "ALL" and batch_grouping == "ALL":
+            print("NEW RACE FROM RUN ENTIRE REPORT: ", race)
+            race_from_races = races_with_info[race]
+            print("TRIGGER X")
+            race_ballots = prepare_race_data(race_from_races, all_votes)
+            print("TRIGGER Y")
+            run_rcv_for_one_race_sample(race_from_races, race_ballots, [race, "ALL", "ALL"])
+            print("TRIGGER Z")
     return export_report
 
 
 
-def run_rcv_for_one_race_sample(race_from_races, race_ballots, qualified_write_in = False):
+def run_rcv_for_one_race_sample(race_from_races, race_ballots, sample_details, qualified_write_in = False):
+    race_name = sample_details[0]
+    precinct = sample_details[1]
+    batch = sample_details[2]
     print("RUNNING RCV FOR SAMPLE")
     sample_report = []
     all_rounds_complete = False
@@ -67,10 +83,10 @@ def run_rcv_for_one_race_sample(race_from_races, race_ballots, qualified_write_i
             print("TRIGGER 1")
             if post_elimination_round[3][:-3].count("I") <= 2  or loop_no == 10:
                 print("TRIGGER 2")
-                export_report.append(["", "","FINAL ROUND: ", loop_no] + summed_round[5] + ["","", loop_no] + post_elimination_round[4])
                 highest_vote_count = max(summed_round[5])
                 highest_vote_index = summed_round[5].index(highest_vote_count)
                 export_report.append(["WINNER: ", summed_round[3][highest_vote_index],"FINAL ROUND: ", loop_no] + summed_round[5] + ["","", loop_no] + post_elimination_round[4])
+                export_report.append(["", "", "", "WINNER: ", summed_round[3][highest_vote_index]])
                 export_report.append([])
                 all_rounds_complete = True
                 print("RUN FOR ONE SAMPLE completed.")
@@ -78,7 +94,7 @@ def run_rcv_for_one_race_sample(race_from_races, race_ballots, qualified_write_i
         # print("POST ELIM ROUND BEFORE: ", post_elimination_round)        
         if loop_no == 0:
             print("TRIGGER 3")
-            export_report.append(["","", "Total Votes", "Round"] + summed_round[3] + ["", "Candidates Eliminated", "Round"] + summed_round[3] + ["", "Where Elimated Candidates Votes Go", "Round"] + summed_round[3])
+            export_report.append(["Race","Precinct", "Batch", "Total Votes", "Round"] + summed_round[3] + ["", "Candidates Eliminated", "Round"] + summed_round[3] + ["", "Where Elimated Candidates Votes Go", "Round"] + summed_round[3])
         if loop_no == 0 and qualified_write_in == False:
             print("TRIGGER 4")
             post_elimination_round = round_elim(summed_round[1], summed_round[2], summed_round[3], summed_round[4], summed_round[5], True)
@@ -86,7 +102,7 @@ def run_rcv_for_one_race_sample(race_from_races, race_ballots, qualified_write_i
             print("TRIGGER 5")
             post_elimination_round = round_elim(summed_round[1], summed_round[2], summed_round[3], summed_round[4], summed_round[5])
         print("POST ELIM ROUND AFTER: ", post_elimination_round[3:])  
-        export_report.append(["", "", "", loop_no] + summed_round[5] + ["","", loop_no] + post_elimination_round[4] + ["","", loop_no] + post_elimination_round[3])
+        export_report.append(["", "", "", loop_no] + summed_round[5] + ["","", loop_no] + post_elimination_round[3] + ["","", loop_no] + post_elimination_round[4])
         print("RUN FOR ONE SAMPLE Loop Ended: " , loop_no)
         loop_no += 1
         
@@ -161,13 +177,18 @@ def check_rounds(races, candidate_line):
 
     return races
 
+def prepare_race_precincts(race_from_races, all_ballots_from_race, ballot_info):
+    ballots_by_precinct = {}
+    return ballots_by_precinct
+
 def prepare_race_data(race_from_races, all_votes):
     """Outputs list where each element is a ballot and each element in a ballot list represents a round (which indexes correspond with candidates)"""
     race_indexes = race_from_races[0]
     candidates = race_from_races[1]
     rounds_indexes = race_from_races[2]
     all_ballots = []
-    for ind, whole_row in enumerate(all_votes):
+    for ind, whole_row_info in enumerate(all_votes):
+        whole_row = whole_row_info[1]
         race_row = whole_row[race_indexes[0]: race_indexes[1] + 1]
         ballot = []
         if race_row.count("0") + race_row.count("1") > (len(candidates) * 5) - 3:
