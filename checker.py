@@ -109,7 +109,7 @@ def run_rcv_for_one_race_sample(race_from_races, race_ballots, sample_details, q
             print("TRIGGER 5")
             post_elimination_round = round_elim(summed_round[1], summed_round[2], summed_round[3], summed_round[4], summed_round[5])
         print("POST ELIM ROUND AFTER: ", post_elimination_round[3:])  
-        export_report.append([race_name, precinct, batch, sum(summed_round[5]) loop_no] + summed_round[5] + ["","", loop_no] + post_elimination_round[3] + ["","", loop_no] + post_elimination_round[4])
+        export_report.append([race_name, precinct, batch, sum(summed_round[5]), loop_no] + summed_round[5] + ["","", loop_no] + post_elimination_round[3] + ["", sum(post_elimination_round[4]), loop_no] + post_elimination_round[4])
         print("RUN FOR ONE SAMPLE Loop Ended: " , loop_no)
         loop_no += 1
         
@@ -258,10 +258,13 @@ def sum_round(race_from_races, race_votes, round_no = -1, categories = [], elimi
         ballot_counted = False
         current_ballot = list(ballot)
         if ballot == ["BLANK"]:
+            ballot_tracker.append(["BLANK"])
             vote_tracker[-3] += 1
         elif ballot == ["EXHAUSTED"]:
+            ballot_tracker.append(["EXHAUSTED"])
             vote_tracker[-2] += 1
         elif ballot == ["OVERVOTE"]:
+            ballot_tracker.append(["OVERVOTE"])
             vote_tracker[-1] += 1
         else:
             while ballot_counted == False:
