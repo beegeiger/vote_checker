@@ -42,20 +42,27 @@ with open('test_data.txt') as csv_file:
 
 input = [race_line, candidate_line, all_votes]
 
-def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, export_report, report_grouping):
+def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, export_report, report_grouping = "None"):
     races_only = check_races(race_line)
     races_with_info = check_rounds(races_only, candidate_line)
     precinct_grouping = report_grouping[1]
     batch_grouping = report_grouping[2]
-    for race in races_only:
-        if precinct_grouping == "ALL" and batch_grouping == "ALL":
-            print("NEW RACE FROM RUN ENTIRE REPORT: ", race)
-            race_from_races = races_with_info[race]
-            print("TRIGGER X")
-            race_ballots = prepare_race_data(race_from_races, all_votes)
-            print("TRIGGER Y")
+    for race in races_only:  
+        print("NEW RACE FROM RUN ENTIRE REPORT: ", race)
+        race_from_races = races_with_info[race]
+        print("TRIGGER X")
+        race_ballots = prepare_race_data(race_from_races, all_votes)
+        if report_grouping == "None":
             run_rcv_for_one_race_sample(race_from_races, race_ballots, [race, "ALL", "ALL"])
-            print("TRIGGER Z")
+        elif report_grouping == "Precinct":
+            race_ballots_by_precinct = prepare_race_data_by_precinct(race_ballots)
+            for rbp in race_ballots_by_precinct:
+                run_rcv_for_one_race_sample(race_from_races, race_ballots_by_precinct[rbp], rbp)
+        elif report_grouping == "Batch":
+            race_ballots_by_precinct = prepare_race_data_by_batch(race_ballots)
+            for rbb in race_ballots_by_batch:
+                run_rcv_for_one_race_sample(race_from_races, race_ballots_by_batch[rbb], rbb)
+
     return export_report
 
 
@@ -199,7 +206,7 @@ def prepare_race_data_by_precinct(all_ballots_from_race):
     for whole_row_info in all_ballots_from_race:
         ballot_info = whole_row_info[0]
         whole_row = whole_row_info[1]
-        identifier = ballot_info[0] + " - " + ballot_info[1]
+        identifier = [ballot_info[0], ballot_info[1], "ALL"]
         if identifier in ballots_by_precinct:
             ballots_by_precinct[identifier] = list(ballots_by_precinct[identifier]) + [whole_row]
         else:
@@ -211,9 +218,9 @@ def prepare_race_data_by_batch(all_ballots_from_race):
     for whole_row_info in all_ballots_from_race:
         ballot_info = whole_row_info[0]
         whole_row = whole_row_info[1]
-        identifier = ballot_info[0] + " - " + ballot_info[2]
+        identifier = [ballot_info[0], "ALL", ballot_info[2]]
         if identifier in ballots_by_batch:
-            ballots_by_precinct[identifier] = = list(ballots_by_batch[identifier]) + [whole_row]
+            ballots_by_precinct[identifier] = list(ballots_by_batch[identifier]) + [whole_row]
         else:
             ballots_by_precinct[identifier] = [whole_row]
     return ballots_by_batch
