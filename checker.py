@@ -177,10 +177,6 @@ def check_rounds(races, candidate_line):
 
     return races
 
-def prepare_race_precincts(race_from_races, all_ballots_from_race, ballot_info):
-    ballots_by_precinct = {}
-    return ballots_by_precinct
-
 def prepare_race_data(race_from_races, all_votes):
     """Outputs list where each element is a ballot and each element in a ballot list represents a round (which indexes correspond with candidates)"""
     race_indexes = race_from_races[0]
@@ -197,6 +193,30 @@ def prepare_race_data(race_from_races, all_votes):
                 ballot.append(race_row[round_pair[0]: round_pair[1] + 1])
             all_ballots.append([ballot_info, ballot])
     return all_ballots
+
+def prepare_race_data_by_precinct(all_ballots_from_race):
+    ballots_by_precinct = {}
+    for whole_row_info in all_ballots_from_race:
+        ballot_info = whole_row_info[0]
+        whole_row = whole_row_info[1]
+        identifier = ballot_info[0] + " - " + ballot_info[1]
+        if identifier in ballots_by_precinct:
+            ballots_by_precinct[identifier] = list(ballots_by_precinct[identifier]) + [whole_row]
+        else:
+            ballots_by_precinct[identifier] = [whole_row]
+    return ballots_by_precinct
+
+def prepare_race_data_by_batch(all_ballots_from_race):
+    ballots_by_batch = {}
+    for whole_row_info in all_ballots_from_race:
+        ballot_info = whole_row_info[0]
+        whole_row = whole_row_info[1]
+        identifier = ballot_info[0] + " - " + ballot_info[2]
+        if identifier in ballots_by_batch:
+            ballots_by_precinct[identifier] = = list(ballots_by_batch[identifier]) + [whole_row]
+        else:
+            ballots_by_precinct[identifier] = [whole_row]
+    return ballots_by_batch
 
 def sum_round(race_from_races, race_votes, round_no = -1, categories = [], elimination_tracker =[]):
     """Outputs [race_from_races, ballot_tracker, round_no, categories, elimination_tracker, vote_tracker]"""
