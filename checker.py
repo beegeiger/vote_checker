@@ -31,13 +31,13 @@ with open('test_data.txt') as csv_file:
             ballot_id_split = row_raw[4].split("-")
             batch = (ballot_id_split[0] + "-" + ballot_id_split[1])
             ballot_info.append([row_raw[4], row_raw[6], batch])
-            if raw_row[4] not in all_races:
-                all_races.append(raw_row[4])
-            if raw_row[6] not in all_precincts:
-                all_precincts.append(raw_row[6])
+            if row_raw[4] not in all_races:
+                all_races.append(row_raw[4])
+            if row_raw[6] not in all_precincts:
+                all_precincts.append(row_raw[6])
             if batch not in all_batches:
                 all_batches.append(batch)
-            all_votes.append([row_raw[4], row_raw[6], batch], row)
+            all_votes.append([[row_raw[4], row_raw[6], batch], row])
         line_count += 1
 
 input = [race_line, candidate_line, all_votes]
@@ -92,7 +92,7 @@ def run_rcv_for_one_race_sample(race_from_races, race_ballots, sample_details, q
                 print("TRIGGER 2")
                 highest_vote_count = max(summed_round[5])
                 highest_vote_index = summed_round[5].index(highest_vote_count)
-                export_report.append(["WINNER: ", summed_round[3][highest_vote_index],"FINAL ROUND: ", loop_no] + summed_round[5] + ["","", loop_no] + post_elimination_round[4])
+                export_report.append(["", "", "", "FINAL ROUND: ", loop_no] + summed_round[5] + ["","", loop_no] + post_elimination_round[4])
                 export_report.append(["", "", "", "WINNER: ", summed_round[3][highest_vote_index]])
                 export_report.append([])
                 all_rounds_complete = True
@@ -109,7 +109,7 @@ def run_rcv_for_one_race_sample(race_from_races, race_ballots, sample_details, q
             print("TRIGGER 5")
             post_elimination_round = round_elim(summed_round[1], summed_round[2], summed_round[3], summed_round[4], summed_round[5])
         print("POST ELIM ROUND AFTER: ", post_elimination_round[3:])  
-        export_report.append(["", "", "", loop_no] + summed_round[5] + ["","", loop_no] + post_elimination_round[3] + ["","", loop_no] + post_elimination_round[4])
+        export_report.append([race_name, precinct, batch, sum(summed_round[5]) loop_no] + summed_round[5] + ["","", loop_no] + post_elimination_round[3] + ["","", loop_no] + post_elimination_round[4])
         print("RUN FOR ONE SAMPLE Loop Ended: " , loop_no)
         loop_no += 1
         
@@ -227,7 +227,7 @@ def prepare_race_data_by_batch(all_ballots_from_race):
 
 def sum_round(race_from_races, race_votes, round_no = -1, categories = [], elimination_tracker =[]):
     """Outputs [race_from_races, ballot_tracker, round_no, categories, elimination_tracker, vote_tracker]"""
-    print("TRIGGER 1001")
+    print("TRIGGER 1001", round_no, race_votes[0:4])
     race_indexes = race_from_races[0]
     candidates = race_from_races[1]
     race_name = race_from_races[-1]
@@ -248,7 +248,10 @@ def sum_round(race_from_races, race_votes, round_no = -1, categories = [], elimi
     ballot_no = 0
     print("TRIGGER 1006")
     for ballot_all in race_votes:
-        ballot = ballot_all[1]
+        if round_no >= 1:
+            ballot = ballot_all
+        else:
+            ballot = ballot_all[1]
         print("TRIGGER 1006.1", ballot)
         ballot_no += 1
         blank_tracker = 0
@@ -323,8 +326,7 @@ def round_elim(ballot_tracker, round_no, categories, elimination_tracker, vote_t
     new_ballot_tracker = []
     no_of_elimated_ballots = 0
     ballot_no = 0
-    for ballot_all in ballot_tracker:
-        ballot = ballot_all[1]
+    for ballot in ballot_tracker:
         ballot_no += 1
         if ballot == ["EXHAUSTED"] or ballot == ["OVERVOTE"] or ballot == ["BLANK"]:
             new_ballot_tracker.append(ballot)
