@@ -53,11 +53,12 @@ def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_im
         if report_grouping == "None":
             run_rcv_for_one_race_sample(race_from_races, race_ballots, [race, "ALL", "ALL"])
         elif report_grouping == "Precinct":
-            race_ballots_by_precinct = prepare_race_data_by_precinct(race_ballots)
+            race_ballots_by_precinct = prepare_race_data_by_precinct(race_ballots, race)
             for rbp in race_ballots_by_precinct:
+                # print("RACE BALLOTS BY PRECINCT: ", rbp, race_ballots_by_precinct[rbp])
                 run_rcv_for_one_race_sample(race_from_races, race_ballots_by_precinct[rbp], rbp)
         elif report_grouping == "Batch":
-            race_ballots_by_precinct = prepare_race_data_by_batch(race_ballots)
+            race_ballots_by_precinct = prepare_race_data_by_batch(race_ballots, race)
             for rbb in race_ballots_by_batch:
                 run_rcv_for_one_race_sample(race_from_races, race_ballots_by_batch[rbb], rbb)
 
@@ -65,11 +66,15 @@ def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_im
 
 
 
-def run_rcv_for_one_race_sample(race_from_races, race_ballots, sample_details, qualified_write_in = False):
+def run_rcv_for_one_race_sample(race_from_races, race_ballots, sample_details_raw, qualified_write_in = False):
+    if isinstance(sample_details_raw, str):
+        sample_details = sample_details_raw.split("/")
+    else:
+        sample_details = sample_details_raw
     race_name = sample_details[0]
     precinct = sample_details[1]
     batch = sample_details[2]
-    print("RUNNING RCV FOR SAMPLE")
+    print("RUNNING RCV FOR SAMPLE:", sample_details)
     sample_report = []
     all_rounds_complete = False
     loop_no = 0
@@ -90,7 +95,7 @@ def run_rcv_for_one_race_sample(race_from_races, race_ballots, sample_details, q
                 print("TRIGGER 2")
                 highest_vote_count = max(summed_round[5])
                 highest_vote_index = summed_round[5].index(highest_vote_count)
-                export_report.append(["", "", "", "FINAL ROUND: ", loop_no] + summed_round[5] + ["","", loop_no] + post_elimination_round[4])
+                export_report.append([race_name, precinct, batch, sum(summed_round[5]), loop_no] + summed_round[5] + ["","", loop_no] + post_elimination_round[3] + ["", sum(post_elimination_round[4]), loop_no] + post_elimination_round[4])
                 export_report.append(["", "", "", "WINNER: ", summed_round[3][highest_vote_index]])
                 export_report.append([])
                 all_rounds_complete = True
@@ -199,25 +204,24 @@ def prepare_race_data(race_from_races, all_votes):
             all_ballots.append([ballot_info, ballot])
     return all_ballots
 
-def prepare_race_data_by_precinct(all_ballots_from_race):
+def prepare_race_data_by_precinct(all_ballots_from_race, race):
     ballots_by_precinct = {}
     for whole_row_info in all_ballots_from_race:
         ballot_info = whole_row_info[0]
         whole_row = whole_row_info[1]
-        identifier = str(ballot_info[0]) + "/" + str(ballot_info[1]) + "/ALL"
+        identifier = str(race) + "/" + str(ballot_info[1]) + "/ALL"
         if identifier in ballots_by_precinct:
-            ballots_by_precinct[identifier] = list(ballots_by_precinct[identifier]) + [whole_row]
+            ballots_by_precinct[identifier] = list(ballots_by_precinct[identifier]) + [whole_row_info]
         else:
-            ballots_by_precinct[identifier] = [whole_row]
-    print("BALLOTS BY RACE: ", len(ballots_by_precinct))
+            ballots_by_precinct[identifier] = [whole_row_info]
     return ballots_by_precinct
 
-def prepare_race_data_by_batch(all_ballots_from_race):
+def prepare_race_data_by_batch(all_ballots_from_race, race):
     ballots_by_batch = {}
     for whole_row_info in all_ballots_from_race:
         ballot_info = whole_row_info[0]
         whole_row = whole_row_info[1]
-        identifier = str(ballot_info[0]) + "/ALL/" + str(ballot_info[2])
+        identifier = str(race) + "/ALL/" + str(ballot_info[2])
         if identifier in ballots_by_batch:
             ballots_by_precinct[identifier] = list(ballots_by_batch[identifier]) + [whole_row]
         else:
@@ -226,32 +230,25 @@ def prepare_race_data_by_batch(all_ballots_from_race):
 
 def sum_round(race_from_races, race_votes, round_no = -1, categories = [], elimination_tracker =[]):
     """Outputs [race_from_races, ballot_tracker, round_no, categories, elimination_tracker, vote_tracker]"""
-    print("TRIGGER 1001", round_no, race_votes[0:4])
     race_indexes = race_from_races[0]
     candidates = race_from_races[1]
     race_name = race_from_races[-1]
-    print("TRIGGER 1002")
     if categories == []:
-        print("TRIGGER 1003")
         categories = list(candidates) + ["Blanks", "Exhausted", "Overvote"]
     round_no += 1
     vote_tracker = []
     ballot_tracker = [] 
-    print("TRIGGER 1004")
     if elimination_tracker == []:
-        print("TRIGGER 1005")
         for cat in categories:
             elimination_tracker.append("I")
     for cat in categories:
         vote_tracker.append(0)
     ballot_no = 0
-    print("TRIGGER 1006")
     for ballot_all in race_votes:
         if round_no >= 1:
             ballot = ballot_all
         else:
             ballot = ballot_all[1]
-        print("TRIGGER 1006.1", ballot)
         ballot_no += 1
         blank_tracker = 0
         ballot_counted = False
@@ -268,7 +265,6 @@ def sum_round(race_from_races, race_votes, round_no = -1, categories = [], elimi
         else:
             while ballot_counted == False:
                 if current_ballot == []:
-                    print("TRIGGER 1006.2")
                     if blank_tracker == len(ballot):
                         vote_tracker[-3] += 1
                         ballot_tracker.append(["BLANK"])
@@ -278,16 +274,13 @@ def sum_round(race_from_races, race_votes, round_no = -1, categories = [], elimi
                         ballot_tracker.append(["EXHAUSTED"])
                         ballot_counted = True
                 elif current_ballot[0].count("1") > 1:
-                    print("TRIGGER 1006.3")
                     vote_tracker[-1] += 1
                     ballot_tracker.append(["OVERVOTE"])
                     ballot_counted = True
                 elif current_ballot[0].count("1") == 0:
-                    print("TRIGGER 1006.4")
                     blank_tracker += 1
                     current_ballot = current_ballot[1:]
                 else:
-                    print("TRIGGER 1006.5", current_ballot[0], elimination_tracker)
                     vote_index = current_ballot[0].index("1")
                     if elimination_tracker[vote_index] != "x":
                         vote_tracker[vote_index] += 1
@@ -300,7 +293,7 @@ def sum_round(race_from_races, race_votes, round_no = -1, categories = [], elimi
 
 def round_elim(ballot_tracker, round_no, categories, elimination_tracker, vote_tracker, round_0_no_write_in = False):
     print("ROUND NO IN ROUND ELIM: ", round_no)
-    print("ROUND ELIM INPUT[1: ]:", round_no, categories, elimination_tracker, vote_tracker)
+    print("ROUND ELIM INPUT:", ballot_tracker, round_no, categories, elimination_tracker, vote_tracker)
     elim_index = 0
     if round_0_no_write_in == False or round_no > 0:
         print("TRIGGER A, elim_before: ", elimination_tracker)
@@ -316,7 +309,7 @@ def round_elim(ballot_tracker, round_no, categories, elimination_tracker, vote_t
         tb_eliminated = categories[lowest_count_ind]
         elimination_tracker[lowest_count_ind] = "x"
         elim_index = lowest_count_ind
-        print("TRIGGER A1, elim_after: ", elimination_tracker, elim_index, tb_eliminated)
+        # print("TRIGGER A1, elim_after: ", elimination_tracker, elim_index, tb_eliminated)
     else:
         print("TRIGGER B")
         write_in_index = categories.index("Write-in")
@@ -329,7 +322,7 @@ def round_elim(ballot_tracker, round_no, categories, elimination_tracker, vote_t
     no_of_elimated_ballots = 0
     ballot_no = 0
     for ballot in ballot_tracker:
-        print("BALLOT: ", ballot, ballot_tracker)
+        # print("BALLOT: ", ballot, ballot_tracker)
         ballot_no += 1
         if ballot == ["EXHAUSTED"] or ballot == ["OVERVOTE"] or ballot == ["BLANK"]:
             new_ballot_tracker.append(ballot)
