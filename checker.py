@@ -42,11 +42,9 @@ with open('test_data.txt') as csv_file:
 
 input = [race_line, candidate_line, all_votes]
 
-def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, export_report, report_grouping = "None"):
+def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, export_report, report_grouping = "Precinct"):
     races_only = check_races(race_line)
     races_with_info = check_rounds(races_only, candidate_line)
-    precinct_grouping = report_grouping[1]
-    batch_grouping = report_grouping[2]
     for race in races_only:  
         print("NEW RACE FROM RUN ENTIRE REPORT: ", race)
         race_from_races = races_with_info[race]
@@ -103,7 +101,7 @@ def run_rcv_for_one_race_sample(race_from_races, race_ballots, sample_details, q
             print("TRIGGER 3")
             export_report.append(["Race","Precinct", "Batch", "Total Votes", "Round"] + summed_round[3] + ["", "Candidates Eliminated", "Round"] + summed_round[3] + ["", "Where Elimated Candidates Votes Go", "Round"] + summed_round[3])
         if loop_no == 0 and qualified_write_in == False:
-            print("TRIGGER 4")
+            print("TRIGGER 4", race_from_races)
             post_elimination_round = round_elim(summed_round[1], summed_round[2], summed_round[3], summed_round[4], summed_round[5], True)
         else:
             print("TRIGGER 5")
@@ -206,11 +204,12 @@ def prepare_race_data_by_precinct(all_ballots_from_race):
     for whole_row_info in all_ballots_from_race:
         ballot_info = whole_row_info[0]
         whole_row = whole_row_info[1]
-        identifier = [ballot_info[0], ballot_info[1], "ALL"]
+        identifier = str(ballot_info[0]) + "/" + str(ballot_info[1]) + "/ALL"
         if identifier in ballots_by_precinct:
             ballots_by_precinct[identifier] = list(ballots_by_precinct[identifier]) + [whole_row]
         else:
             ballots_by_precinct[identifier] = [whole_row]
+    print("BALLOTS BY RACE: ", len(ballots_by_precinct))
     return ballots_by_precinct
 
 def prepare_race_data_by_batch(all_ballots_from_race):
@@ -218,7 +217,7 @@ def prepare_race_data_by_batch(all_ballots_from_race):
     for whole_row_info in all_ballots_from_race:
         ballot_info = whole_row_info[0]
         whole_row = whole_row_info[1]
-        identifier = [ballot_info[0], "ALL", ballot_info[2]]
+        identifier = str(ballot_info[0]) + "/ALL/" + str(ballot_info[2])
         if identifier in ballots_by_batch:
             ballots_by_precinct[identifier] = list(ballots_by_batch[identifier]) + [whole_row]
         else:
@@ -330,6 +329,7 @@ def round_elim(ballot_tracker, round_no, categories, elimination_tracker, vote_t
     no_of_elimated_ballots = 0
     ballot_no = 0
     for ballot in ballot_tracker:
+        print("BALLOT: ", ballot, ballot_tracker)
         ballot_no += 1
         if ballot == ["EXHAUSTED"] or ballot == ["OVERVOTE"] or ballot == ["BLANK"]:
             new_ballot_tracker.append(ballot)
