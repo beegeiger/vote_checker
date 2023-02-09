@@ -37,6 +37,7 @@ def browseFiles():
       
     # Change label contents
     label_file_explorer.configure(text="File Opened: " + filename)
+    print("File Opened: ", filename)
       
       
                                                                                                   
@@ -76,6 +77,7 @@ label_radios = Label(window)
 
 def sel():
    selection = "You selected the option " + str(var.get())
+   print(selection)
    label_radios.config(text = selection)
 
 var = IntVar()
