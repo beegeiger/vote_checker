@@ -16,7 +16,7 @@ root = Tk()
 root.title('Python RCV Checker Parameters')
   
 # Set root size
-root.geometry("600x600")
+root.geometry("600x520")
   
 #Set root background color
 root.config()
@@ -33,9 +33,9 @@ file_label = Label(frame, text="CVR Report File:", height =1)
 file_label.pack(pady=0, side= TOP, anchor="w")
 
 top = Frame(frame)
-bottom = Frame(frame)
+
 top.pack(side=TOP)
-bottom.pack(side=BOTTOM, fill=BOTH, expand=True)
+
 
 def browseFiles():
     filename = filedialog.askopenfilename(initialdir = "./",
@@ -99,16 +99,59 @@ R3.pack( anchor = W)
 
 label_radios.pack()
 
+##########################################################################################
+
+save_type_label = Label(frame, text="How Would You Like the Report(s) generated?", height =2)
+save_type_label.pack(pady=0, side= TOP, anchor="w")
+
+save_label_radios = Label(frame)
+
+def sel_repo():
+   selection = "You selected the option " + str(var.get())
+   print(selection)
+   save_label_radios.config(text = selection)
+
+var2 = IntVar()
+
+R4 = Radiobutton(frame, text="All Together in One .csv File", variable=var2, value=4,
+                  command=sel)
+R4.pack( anchor = W )
+
+R5 = Radiobutton(frame, text="Separate .csv Files for All Races", variable=var2, value=5,
+                  command=sel)
+R5.pack( anchor = W )
+
+
+save_label_radios.pack()
+
+##########################################################################################
+save_name_label = Label(frame, text="What would you like to name your base report file? (optional)", height =2)
+save_name_label.pack(pady=0, side= TOP, anchor="w")
+
+input_txt = Entry(frame, width=50)
+input_txt.insert(0, "RCV_Output_Report")
+input_txt.pack()
 
 
 ##########################################################################################
-
+bottom = Frame(frame)
+bottom.pack(side=BOTTOM, fill=BOTH, expand=True)
 button_exit = Button(frame,
                      text = "Exit",
                      command = exit)
+button_exit.pack(in_=bottom, side=LEFT)
 
-button_exit.pack()
+spacer2 = Label(frame, height =1, width=16)
 
+spacer2.pack(in_=bottom, side=LEFT, anchor="w")
 
+button_README = Button(frame,
+                     text = "README File")
+button_README.pack(in_=bottom, side=LEFT)
+
+button_run = Button(frame,
+                     text = "Run Report",
+                     command = exit)
+button_run.pack(in_=bottom, side=RIGHT)
 # Let the root wait for any events
 root.mainloop()
