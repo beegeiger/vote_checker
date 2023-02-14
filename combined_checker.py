@@ -1,5 +1,8 @@
 import csv
-
+from tkinter import *
+  
+# import filedialog module
+from tkinter import filedialog
 
 race_line =[]
 candidate_line =[]
@@ -382,10 +385,6 @@ def round_elim(ballot_tracker, round_no, categories, elimination_tracker, vote_t
 
 
 
-from tkinter import *
-  
-# import filedialog module
-from tkinter import filedialog
 
 
 # Create the root window
@@ -395,13 +394,15 @@ root = Tk()
 root.title('Python RCV Checker Parameters')
   
 # Set root size
-root.geometry("600x520")
+root.geometry("600x500")
   
 #Set root background color
 root.config()
 
 frame = Frame(root)
 frame.pack(fill=BOTH, expand=True, padx=30, pady=25)
+
+
 
 
 input_file_input = ""
@@ -533,6 +534,7 @@ def submit_input():
       file_grouping_input = "Separate"
    output_file_input = input_txt.get()
    print("SUBMIT INPUT: ", input_file_input, sample_grouping_input, file_grouping_input, output_file_input)
+   new_processing_frame()
    run_alg_code(input_file_input, sample_grouping_input, file_grouping_input, output_file_input)
    return
 
@@ -560,9 +562,9 @@ button_run.pack(in_=bottom, side=RIGHT)
 
 def new_processing_frame():
    frame.destroy()
-   frame2 = Frame(root)
-   frame2.pack(fill=BOTH, expand=True, padx=30, pady=25)
-   processing_label = Label(frame2, text="The Report Is Being Run...", height =2)
+   frame2.pack(fill=BOTH, expand=True, padx=30, pady=25, side=TOP)
+   root.mainloop()
+   print("Frame should have been forgotten now.")
    return
 
 def new_error_frame():
@@ -570,6 +572,7 @@ def new_error_frame():
    frame3 = Frame(root)
    frame3.pack(fill=BOTH, expand=True, padx=30, pady=25)
    processing_label = Label(frame3, text="There is an issue with the information you entered. Please close this window and try again.", height =2)
+   processing_label.pack()
    button_exit = Button(frame3,
                      text = "Exit",
                      command = exit)
@@ -581,6 +584,7 @@ def new_exit_frame():
    frame4 = Frame(root)
    frame4.pack(fill=BOTH, expand=True, padx=30, pady=25)
    processing_label = Label(frame4, text="The Report Is Concluded! You may close this window.", height =2)
+   processing_label.pack()
    button_exit = Button(frame4,
                      text = "Exit",
                      command = exit)
@@ -592,6 +596,8 @@ def run_alg_code(import_report, sample_grouping = "None", file_grouping ="None",
     open_import_file(import_report, sample_grouping, file_grouping, output_file_name)
     return
 
+frame2 = Frame(root)
 
-
+processing_label = Label(frame2, text="The Report Is Being Run. This window will close automatically when the program is completed.", height =2)
+processing_label.pack()
 root.mainloop()
