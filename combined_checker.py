@@ -423,7 +423,9 @@ tkinter_file_input_name = ""
 def browseFiles():
     filename = filedialog.askopenfilename(initialdir = "./",
                                           title = "Select a File",
-                                          filetypes = (("Text files",
+                                          filetypes = (("CSV files",
+                                                        "*.csv*"),
+                                                      ("Text files",
                                                         "*.txt*"),
                                                        ("all files",
                                                         "*.*")))
@@ -560,36 +562,7 @@ button_run = Button(frame,
 button_run.pack(in_=bottom, side=RIGHT)
 # Let the root wait for any events
 
-def new_processing_frame():
-   frame.destroy()
-   frame2.pack(fill=BOTH, expand=True, padx=30, pady=25, side=TOP)
-   root.mainloop()
-   print("Frame should have been forgotten now.")
-   return
 
-def new_error_frame():
-   frame.destroy()
-   frame3 = Frame(root)
-   frame3.pack(fill=BOTH, expand=True, padx=30, pady=25)
-   processing_label = Label(frame3, text="There is an issue with the information you entered. Please close this window and try again.", height =2)
-   processing_label.pack()
-   button_exit = Button(frame3,
-                     text = "Exit",
-                     command = exit)
-   button_exit.pack(in_=bottom, side=RIGHT)
-   return
-
-def new_exit_frame():
-   frame2.destroy()
-   frame4 = Frame(root)
-   frame4.pack(fill=BOTH, expand=True, padx=30, pady=25)
-   processing_label = Label(frame4, text="The Report Is Concluded! You may close this window.", height =2)
-   processing_label.pack()
-   button_exit = Button(frame4,
-                     text = "Exit",
-                     command = exit)
-   button_exit.pack(in_=bottom, side=Right)
-   return
 
 
 def run_alg_code(import_report, sample_grouping = "None", file_grouping ="None", output_file_name="RCV_Report"):
@@ -597,7 +570,14 @@ def run_alg_code(import_report, sample_grouping = "None", file_grouping ="None",
     return
 
 frame2 = Frame(root)
-
-processing_label = Label(frame2, text="The Report Is Being Run. This window will close automatically when the program is completed.", height =2)
+processing_label = Label(frame2, text="The Report Is Being Run...\n This window will close automatically when the program is completed.", height =5, anchor="w")
 processing_label.pack()
+
+def new_processing_frame():
+   frame.destroy()
+   frame2.pack(fill=BOTH, expand=True, padx=30, pady=25, side=TOP)
+   root.update()
+   print("Frame should have been forgotten now.")
+   return
+
 root.mainloop()
