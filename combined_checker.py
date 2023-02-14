@@ -13,7 +13,7 @@ all_batches = []
 
 export_report = []
 
-def open_import_file(filename, sample_grouping = "None", file_grouping ="None", output_file_name="RCV_Report")):
+def open_import_file(filename, sample_grouping = "None", file_grouping ="None", output_file_name="RCV_Report"):
    with open(filename) as csv_file:
        csv_reader = csv.reader(csv_file, delimiter=',')
        line_count = 0
@@ -43,10 +43,10 @@ def open_import_file(filename, sample_grouping = "None", file_grouping ="None", 
            line_count += 1
        all_precincts.sort()
        all_batches.sort()
-   run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, report_grouping = sample_grouping, file_grouping=file_grouping, export_report=output_file_name):
+   run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, sample_grouping, file_grouping, output_file_name)
    return
 
-def write_exported_file(export_report):
+def write_exported_file(export_report, output_file_name):
    with open(output_file_name, 'w') as f:
       # using csv.writer method from CSV package
       write = csv.writer(f)
@@ -56,7 +56,7 @@ def write_exported_file(export_report):
 
 input = [race_line, candidate_line, all_votes]
 
-def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, report_grouping = "None", file_grouping="Together", export_report="RCV_Report"):
+def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, report_grouping = "None", file_grouping="Together", export_report_name="RCV_Report"):
     races_only = check_races(race_line)
     races_with_info = check_rounds(races_only, candidate_line)
     for race in races_only:  
@@ -76,7 +76,9 @@ def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_im
             race_ballots_by_batch = prepare_race_data_by_batch(race_ballots, race)
             for rbb in race_ballots_by_batch:
                 run_rcv_for_one_race_sample(race_from_races, race_ballots_by_batch[rbb], rbb)
-
+    write_exported_file(export_report, export_report_name)
+    print("THE ALGORITHM HAS CONCLUDED AND YOUR FILE IS NOW READY!")
+    root.destroy()
     return export_report
 
 
@@ -515,7 +517,8 @@ def submit_input():
    print("VAR: ", var, var2, var.get(), var2.get())
    input_file_input_raw = label_file_explorer['text']
    input_raw_list = input_file_input_raw.split(":")
-   input_file_input = input_raw_list[1]
+   input_raw_list2 = input_raw_list[1].split("/")
+   input_file_input = input_raw_list2[-1]
    sample_grouping_input = ""
    file_grouping_input = ""
    if var.get() == 1:
@@ -530,6 +533,7 @@ def submit_input():
       file_grouping_input = "Separate"
    output_file_input = input_txt.get()
    print("SUBMIT INPUT: ", input_file_input, sample_grouping_input, file_grouping_input, output_file_input)
+   run_alg_code(input_file_input, sample_grouping_input, file_grouping_input, output_file_input)
    return
 
 
@@ -559,10 +563,6 @@ def new_processing_frame():
    frame2 = Frame(root)
    frame2.pack(fill=BOTH, expand=True, padx=30, pady=25)
    processing_label = Label(frame2, text="The Report Is Being Run...", height =2)
-   button_exit = Button(frame2,
-                     text = "Exit",
-                     command = exit)
-   button_exit.pack(in_=bottom, side=LEFT)
    return
 
 def new_error_frame():
@@ -590,7 +590,6 @@ def new_exit_frame():
 
 def run_alg_code(import_report, sample_grouping = "None", file_grouping ="None", output_file_name="RCV_Report"):
     open_import_file(import_report, sample_grouping, file_grouping, output_file_name)
-    
     return
 
 
