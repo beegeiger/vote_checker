@@ -21,6 +21,11 @@ frame = Frame(root)
 frame.pack(fill=BOTH, expand=True, padx=30, pady=25)
 
 
+input_file_input = ""
+sample_grouping_input = ""
+file_grouping_input = ""
+output_file_input = ""
+
 ##########################################################################
 #Tkinter to select input file
 
@@ -29,8 +34,10 @@ file_label.pack(pady=0, side= TOP, anchor="w")
 top = Frame(frame)
 top.pack(side=TOP)
 
+tkinter_file_input_name = ""
+
 def browseFiles():
-    filename = filedialog.askopenfilename(initialdir = "./",
+    tkinter_file_input_name = filedialog.askopenfilename(initialdir = "./",
                                           title = "Select a File",
                                           filetypes = (("Text files",
                                                         "*.txt*"),
@@ -38,8 +45,8 @@ def browseFiles():
                                                         "*.*")))
       
     # Change label contents
-    label_file_explorer.configure(text="File Selected: " + filename, wraplength=325)
-    print("File Opened: ", filename)    
+    label_file_explorer.configure(text="File Selected: " + tkinter_file_input_name, wraplength=325)
+    print("File Opened: ", tkinter_file_input_name)    
                                                                                                    
 # Create a File Explorer label
 label_file_explorer = Label(frame,
@@ -71,15 +78,15 @@ def sel():
    label_radios.config(text = selection)
 
 var = IntVar()
-R1 = Radiobutton(frame, text="By Race ONLY", variable=var, value=1,
+R1 = Radiobutton(frame, text="By Race ONLY", variable=var, value="None",
                   command=sel)
 R1.pack( anchor = W )
 
-R2 = Radiobutton(frame, text="By Race and Precinct", variable=var, value=2,
+R2 = Radiobutton(frame, text="By Race and Precinct", variable=var, value="Precinct",
                   command=sel)
 R2.pack( anchor = W )
 
-R3 = Radiobutton(frame, text="By Race and Batch", variable=var, value=3,
+R3 = Radiobutton(frame, text="By Race and Batch", variable=var, value="Batch",
                   command=sel)
 R3.pack( anchor = W)
 
@@ -129,15 +136,26 @@ spacer2 = Label(frame, height =1, width=16)
 
 spacer2.pack(in_=bottom, side=LEFT, anchor="w")
 
-button_README = Button(frame,
-                     text = "README File")
-button_README.pack(in_=bottom, side=LEFT)
+# button_README = Button(frame,
+#                      text = "README File")
+# button_README.pack(in_=bottom, side=LEFT)
 
 button_run = Button(frame,
                      text = "Run Report",
-                     command = exit)
+                     command =submit_input)
 button_run.pack(in_=bottom, side=RIGHT)
 # Let the root wait for any events
+
+def submit_input():
+   input_file_input = tkinter_file_input_name
+   sample_grouping_input = str(var.get())
+   file_grouping_input = str(var2.get())
+   output_file_input = input_txt.get()
+   print("SUBMIT INPUT: ", input_file_input, sample_grouping_input, file_grouping_input, output_file_input)
+   return
+
+
+
 root.mainloop()
 
 
@@ -158,39 +176,49 @@ all_batches = []
 
 export_report = []
 
-with open('test_data.txt') as csv_file:
-    csv_reader = csv.reader(csv_file, delimiter=',')
-    line_count = 0
-    start_index = 0
-    for ind1, row_raw in enumerate(csv_reader):
-        if ind1 == 0:
-            for ind2, element in enumerate(row_raw):
-                if element == "BallotType":
-                    start_index = ind2 + 2
-        row = row_raw[start_index:]
-        entire_report_import.append(row_raw)
-        if line_count == 0:
-            race_line = row
-        elif line_count == 1:
-            candidate_line = row
-        elif line_count > 2 and row_raw[7] != "TOTAL":
-            ballot_id_split = row_raw[4].split("-")
-            batch = (ballot_id_split[0] + "-" + ballot_id_split[1])
-            ballot_info.append([row_raw[4], row_raw[6], batch])
-            if row_raw[4] not in all_races:
-                all_races.append(row_raw[4])
-            if row_raw[6] not in all_precincts:
-                all_precincts.append(row_raw[6])
-            if batch not in all_batches:
-                all_batches.append(batch)
-            all_votes.append([[row_raw[4], row_raw[6], batch], row])
-        line_count += 1
-    all_precincts.sort()
-    all_batches.sort()
+def open_import_file(filename):
+   with open(filename) as csv_file:
+       csv_reader = csv.reader(csv_file, delimiter=',')
+       line_count = 0
+       start_index = 0
+       for ind1, row_raw in enumerate(csv_reader):
+           if ind1 == 0:
+               for ind2, element in enumerate(row_raw):
+                   if element == "BallotType":
+                       start_index = ind2 + 2
+           row = row_raw[start_index:]
+           entire_report_import.append(row_raw)
+           if line_count == 0:
+               race_line = row
+           elif line_count == 1:
+               candidate_line = row
+           elif line_count > 2 and row_raw[7] != "TOTAL":
+               ballot_id_split = row_raw[4].split("-")
+               batch = (ballot_id_split[0] + "-" + ballot_id_split[1])
+               ballot_info.append([row_raw[4], row_raw[6], batch])
+               if row_raw[4] not in all_races:
+                   all_races.append(row_raw[4])
+               if row_raw[6] not in all_precincts:
+                   all_precincts.append(row_raw[6])
+               if batch not in all_batches:
+                   all_batches.append(batch)
+               all_votes.append([[row_raw[4], row_raw[6], batch], row])
+           line_count += 1
+       all_precincts.sort()
+       all_batches.sort()
+   return
+
+def write_exported_file(export_report):
+with open(output_file_name, 'w') as f:
+   # using csv.writer method from CSV package
+   write = csv.writer(f)
+   write.writerows(export_report)
+   return   
+
 
 input = [race_line, candidate_line, all_votes]
 
-def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, export_report, report_grouping = "Precinct"):
+def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, export_report, report_grouping = "None"):
     races_only = check_races(race_line)
     races_with_info = check_rounds(races_only, candidate_line)
     for race in races_only:  
@@ -264,9 +292,7 @@ def run_rcv_for_one_race_sample(race_from_races, race_ballots, sample_details_ra
     return sample_report
 
 
-def run_code(race_line, candidate_line, all_votes, entire_report_import, export_report):
-    run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, export_report)
-    return
+
 
 # def run_code(race_line, candidate_line, all_votes, entire_report_import, export_report):
 #     races_only = check_races(race_line)
@@ -501,12 +527,20 @@ def round_elim(ballot_tracker, round_no, categories, elimination_tracker, vote_t
     # print("ROUND NO IN ROUND ELIM 2: ", round_no)
     return [new_ballot_tracker, round_no, categories, elimination_tracker, where_elim_go]
 
+def run_code(import_report, sample_grouping = "None", file_grouping ="None", output_file_name="RCV_Report"):
+    open_import_file(import_report)
+    run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, export_report)
+    return
 
 run_code(race_line, candidate_line, all_votes, entire_report_import, export_report)
 
 output_file_name = "RCV_Report"
 
-with open(output_file_name, 'w') as f:
-    # using csv.writer method from CSV package
-    write = csv.writer(f)
-    write.writerows(export_report)
+
+
+
+
+
+##########################################################################################
+##########################################################################################
+##########################################################################################
