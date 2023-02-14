@@ -1,168 +1,5 @@
 import csv
-from tkinter import *
-  
-# import filedialog module
-from tkinter import filedialog
 
-
-# Create the root window
-root = Tk()
-  
-# Set root title
-root.title('Python RCV Checker Parameters')
-  
-# Set root size
-root.geometry("600x520")
-  
-#Set root background color
-root.config()
-
-frame = Frame(root)
-frame.pack(fill=BOTH, expand=True, padx=30, pady=25)
-
-
-input_file_input = ""
-sample_grouping_input = ""
-file_grouping_input = ""
-output_file_input = ""
-
-##########################################################################
-#Tkinter to select input file
-
-file_label = Label(frame, text="CVR Report File:", height =1)
-file_label.pack(pady=0, side= TOP, anchor="w")
-top = Frame(frame)
-top.pack(side=TOP)
-
-tkinter_file_input_name = ""
-
-def browseFiles():
-    tkinter_file_input_name = filedialog.askopenfilename(initialdir = "./",
-                                          title = "Select a File",
-                                          filetypes = (("Text files",
-                                                        "*.txt*"),
-                                                       ("all files",
-                                                        "*.*")))
-      
-    # Change label contents
-    label_file_explorer.configure(text="File Selected: " + tkinter_file_input_name, wraplength=325)
-    print("File Opened: ", tkinter_file_input_name)    
-                                                                                                   
-# Create a File Explorer label
-label_file_explorer = Label(frame,
-                            text = "Select CVR Report to Process: ",
-                            width = 50, height = 2,
-                            fg = "blue")
-      
-button_explore = Button(frame,
-                        text = "Browse Files",
-                        command = browseFiles)
-
-label_file_explorer.pack(in_=top, side=LEFT) 
-button_explore.pack(in_=top, side=LEFT)  
-
-########################################################################################
-spacer = Label(frame, text="", height =1)
-spacer.pack(pady=0, side= TOP, anchor="w")
-
-########################################################################################
-#Radio Buttons for Selecting Sample Type
-
-sample_label = Label(frame, text="Select How Report Samples are Grouped:", height =2)
-sample_label.pack(pady=0, side= TOP, anchor="w")
-label_radios = Label(frame)
-
-def sel():
-   selection = "You selected the option " + str(var.get())
-   print(selection)
-   label_radios.config(text = selection)
-
-var = IntVar()
-R1 = Radiobutton(frame, text="By Race ONLY", variable=var, value="None",
-                  command=sel)
-R1.pack( anchor = W )
-
-R2 = Radiobutton(frame, text="By Race and Precinct", variable=var, value="Precinct",
-                  command=sel)
-R2.pack( anchor = W )
-
-R3 = Radiobutton(frame, text="By Race and Batch", variable=var, value="Batch",
-                  command=sel)
-R3.pack( anchor = W)
-
-label_radios.pack()
-
-##########################################################################################
-
-save_type_label = Label(frame, text="How Would You Like the Report(s) generated?", height =2)
-save_type_label.pack(pady=0, side= TOP, anchor="w")
-save_label_radios = Label(frame)
-
-def sel_repo():
-   selection = "You selected the option " + str(var.get())
-   print(selection)
-   save_label_radios.config(text = selection)
-
-var2 = IntVar()
-R4 = Radiobutton(frame, text="All Together in One .csv File", variable=var2, value=4,
-                  command=sel)
-R4.pack( anchor = W )
-
-R5 = Radiobutton(frame, text="Separate .csv Files for All Races", variable=var2, value=5,
-                  command=sel)
-R5.pack( anchor = W )
-
-
-save_label_radios.pack()
-
-##########################################################################################
-save_name_label = Label(frame, text="What would you like to name your base report file? (optional)", height =2)
-save_name_label.pack(pady=0, side= TOP, anchor="w")
-
-input_txt = Entry(frame, width=50)
-input_txt.insert(0, "RCV_Output_Report")
-input_txt.pack()
-
-
-##########################################################################################
-bottom = Frame(frame)
-bottom.pack(side=BOTTOM, fill=BOTH, expand=True)
-button_exit = Button(frame,
-                     text = "Exit",
-                     command = exit)
-button_exit.pack(in_=bottom, side=LEFT)
-
-spacer2 = Label(frame, height =1, width=16)
-
-spacer2.pack(in_=bottom, side=LEFT, anchor="w")
-
-# button_README = Button(frame,
-#                      text = "README File")
-# button_README.pack(in_=bottom, side=LEFT)
-
-button_run = Button(frame,
-                     text = "Run Report",
-                     command =submit_input)
-button_run.pack(in_=bottom, side=RIGHT)
-# Let the root wait for any events
-
-def submit_input():
-   input_file_input = tkinter_file_input_name
-   sample_grouping_input = str(var.get())
-   file_grouping_input = str(var2.get())
-   output_file_input = input_txt.get()
-   print("SUBMIT INPUT: ", input_file_input, sample_grouping_input, file_grouping_input, output_file_input)
-   return
-
-
-
-root.mainloop()
-
-
-
-##########################################################################################
-##########################################################################################
-##########################################################################################
 
 race_line =[]
 candidate_line =[]
@@ -176,7 +13,7 @@ all_batches = []
 
 export_report = []
 
-def open_import_file(filename):
+def open_import_file(filename, sample_grouping = "None", file_grouping ="None", output_file_name="RCV_Report")):
    with open(filename) as csv_file:
        csv_reader = csv.reader(csv_file, delimiter=',')
        line_count = 0
@@ -206,19 +43,20 @@ def open_import_file(filename):
            line_count += 1
        all_precincts.sort()
        all_batches.sort()
+   run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, report_grouping = sample_grouping, file_grouping=file_grouping, export_report=output_file_name):
    return
 
 def write_exported_file(export_report):
-with open(output_file_name, 'w') as f:
-   # using csv.writer method from CSV package
-   write = csv.writer(f)
-   write.writerows(export_report)
+   with open(output_file_name, 'w') as f:
+      # using csv.writer method from CSV package
+      write = csv.writer(f)
+      write.writerows(export_report)
    return   
 
 
 input = [race_line, candidate_line, all_votes]
 
-def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, export_report, report_grouping = "None"):
+def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, report_grouping = "None", file_grouping="Together", export_report="RCV_Report"):
     races_only = check_races(race_line)
     races_with_info = check_rounds(races_only, candidate_line)
     for race in races_only:  
@@ -527,20 +365,234 @@ def round_elim(ballot_tracker, round_no, categories, elimination_tracker, vote_t
     # print("ROUND NO IN ROUND ELIM 2: ", round_no)
     return [new_ballot_tracker, round_no, categories, elimination_tracker, where_elim_go]
 
-def run_code(import_report, sample_grouping = "None", file_grouping ="None", output_file_name="RCV_Report"):
-    open_import_file(import_report)
-    run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, export_report)
+
+
+
+
+
+
+
+
+##########################################################################################
+##########################################################################################
+##########################################################################################
+
+
+
+
+from tkinter import *
+  
+# import filedialog module
+from tkinter import filedialog
+
+
+# Create the root window
+root = Tk()
+  
+# Set root title
+root.title('Python RCV Checker Parameters')
+  
+# Set root size
+root.geometry("600x520")
+  
+#Set root background color
+root.config()
+
+frame = Frame(root)
+frame.pack(fill=BOTH, expand=True, padx=30, pady=25)
+
+
+input_file_input = ""
+sample_grouping_input = ""
+file_grouping_input = ""
+output_file_input = ""
+
+##########################################################################
+#Tkinter to select input file
+
+file_label = Label(frame, text="CVR Report File:", height =1)
+file_label.pack(pady=0, side= TOP, anchor="w")
+top = Frame(frame)
+top.pack(side=TOP)
+
+tkinter_file_input_name = ""
+
+def browseFiles():
+    filename = filedialog.askopenfilename(initialdir = "./",
+                                          title = "Select a File",
+                                          filetypes = (("Text files",
+                                                        "*.txt*"),
+                                                       ("all files",
+                                                        "*.*")))
+      
+    # Change label contents
+    label_file_explorer.configure(text="File Selected: " + filename, wraplength=325)
+    tkinter_file_input_name = filename
+    print("FILENAME, TKINTER FILE NAME: ", filename, tkinter_file_input_name)
+    print("File Opened: ", filename)    
+                                                           
+
+
+
+# Create a File Explorer label
+label_file_explorer = Label(frame,
+                            text = "Select CVR Report to Process: ",
+                            width = 50, height = 2,
+                            fg = "blue")
+      
+button_explore = Button(frame,
+                        text = "Browse Files",
+                        command = browseFiles)
+
+label_file_explorer.pack(in_=top, side=LEFT) 
+button_explore.pack(in_=top, side=LEFT)  
+
+########################################################################################
+spacer = Label(frame, text="", height =1)
+spacer.pack(pady=0, side= TOP, anchor="w")
+
+########################################################################################
+#Radio Buttons for Selecting Sample Type
+
+sample_label = Label(frame, text="Select How Report Samples are Grouped:", height =2)
+sample_label.pack(pady=0, side= TOP, anchor="w")
+label_radios = Label(frame)
+
+def sel():
+   selection = "You selected the option " + str(var.get())
+   print(selection)
+   label_radios.config(text = selection)
+
+var = IntVar(None, 1)
+R1 = Radiobutton(frame, text="By Race ONLY", variable=var, value=1,
+                  command=sel)
+R1.pack( anchor = W )
+
+R2 = Radiobutton(frame, text="By Race and Precinct", variable=var, value=2,
+                  command=sel)
+R2.pack( anchor = W )
+
+R3 = Radiobutton(frame, text="By Race and Batch", variable=var, value=3,
+                  command=sel)
+R3.pack( anchor = W)
+
+label_radios.pack()
+
+##########################################################################################
+
+save_type_label = Label(frame, text="How Would You Like the Report(s) generated?", height =2)
+save_type_label.pack(pady=0, side= TOP, anchor="w")
+save_label_radios = Label(frame)
+
+def sel_repo():
+   selection = "You selected the option " + str(var.get())
+   print(selection)
+   save_label_radios.config(text = selection)
+
+var2 = IntVar(None, 4)
+R4 = Radiobutton(frame, text="All Together in One .csv File", variable=var2, value=4,
+                  command=sel)
+R4.pack( anchor = W )
+
+R5 = Radiobutton(frame, text="Separate .csv Files for All Races", variable=var2, value=5,
+                  command=sel)
+R5.pack( anchor = W )
+
+
+save_label_radios.pack()
+
+##########################################################################################
+save_name_label = Label(frame, text="What would you like to name your base report file? (optional)", height =2)
+save_name_label.pack(pady=0, side= TOP, anchor="w")
+
+input_txt = Entry(frame, width=50)
+input_txt.insert(0, "RCV_Output_Report")
+input_txt.pack()
+
+
+##########################################################################################
+def submit_input():
+   print("VAR: ", var, var2, var.get(), var2.get())
+   input_file_input_raw = label_file_explorer['text']
+   input_raw_list = input_file_input_raw.split(":")
+   input_file_input = input_raw_list[1]
+   sample_grouping_input = ""
+   file_grouping_input = ""
+   if var.get() == 1:
+      sample_grouping_input = "None"
+   elif var.get() == 2:
+      sample_grouping_input = "Precinct"
+   elif var.get() == 3:
+      sample_grouping_input = "Batch"
+   if var2.get() == 4:
+      file_grouping_input = "Together"
+   elif var2.get() == 5:
+      file_grouping_input = "Separate"
+   output_file_input = input_txt.get()
+   print("SUBMIT INPUT: ", input_file_input, sample_grouping_input, file_grouping_input, output_file_input)
+   return
+
+
+bottom = Frame(frame)
+bottom.pack(side=BOTTOM, fill=BOTH, expand=True)
+button_exit = Button(frame,
+                     text = "Exit",
+                     command = exit)
+button_exit.pack(in_=bottom, side=LEFT)
+
+spacer2 = Label(frame, height =1, width=16)
+
+spacer2.pack(in_=bottom, side=LEFT, anchor="w")
+
+# button_README = Button(frame,
+#                      text = "README File")
+# button_README.pack(in_=bottom, side=LEFT)
+
+button_run = Button(frame,
+                     text = "Run Report",
+                     command =submit_input)
+button_run.pack(in_=bottom, side=RIGHT)
+# Let the root wait for any events
+
+def new_processing_frame():
+   frame.destroy()
+   frame2 = Frame(root)
+   frame2.pack(fill=BOTH, expand=True, padx=30, pady=25)
+   processing_label = Label(frame2, text="The Report Is Being Run...", height =2)
+   button_exit = Button(frame2,
+                     text = "Exit",
+                     command = exit)
+   button_exit.pack(in_=bottom, side=LEFT)
+   return
+
+def new_error_frame():
+   frame.destroy()
+   frame3 = Frame(root)
+   frame3.pack(fill=BOTH, expand=True, padx=30, pady=25)
+   processing_label = Label(frame3, text="There is an issue with the information you entered. Please close this window and try again.", height =2)
+   button_exit = Button(frame3,
+                     text = "Exit",
+                     command = exit)
+   button_exit.pack(in_=bottom, side=RIGHT)
+   return
+
+def new_exit_frame():
+   frame2.destroy()
+   frame4 = Frame(root)
+   frame4.pack(fill=BOTH, expand=True, padx=30, pady=25)
+   processing_label = Label(frame4, text="The Report Is Concluded! You may close this window.", height =2)
+   button_exit = Button(frame4,
+                     text = "Exit",
+                     command = exit)
+   button_exit.pack(in_=bottom, side=Right)
+   return
+
+
+def run_alg_code(import_report, sample_grouping = "None", file_grouping ="None", output_file_name="RCV_Report"):
+    open_import_file(import_report, sample_grouping, file_grouping, output_file_name)
+    
     return
 
-run_code(race_line, candidate_line, all_votes, entire_report_import, export_report)
-
-output_file_name = "RCV_Report"
 
 
-
-
-
-
-##########################################################################################
-##########################################################################################
-##########################################################################################
+root.mainloop()
