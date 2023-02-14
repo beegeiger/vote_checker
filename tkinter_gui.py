@@ -29,13 +29,9 @@ frame.pack(fill=BOTH, expand=True, padx=30, pady=25)
 #Tkinter to select input file
 
 file_label = Label(frame, text="CVR Report File:", height =1)
-
 file_label.pack(pady=0, side= TOP, anchor="w")
-
 top = Frame(frame)
-
 top.pack(side=TOP)
-
 
 def browseFiles():
     filename = filedialog.askopenfilename(initialdir = "./",
@@ -48,8 +44,7 @@ def browseFiles():
     # Change label contents
     label_file_explorer.configure(text="File Selected: " + filename, wraplength=325)
     print("File Opened: ", filename)    
-      
-                                                                                              
+                                                                                                   
 # Create a File Explorer label
 label_file_explorer = Label(frame,
                             text = "Select CVR Report to Process: ",
@@ -60,14 +55,11 @@ button_explore = Button(frame,
                         text = "Browse Files",
                         command = browseFiles)
 
-label_file_explorer.pack(in_=top, side=LEFT)
-  
-button_explore.pack(in_=top, side=LEFT)
-  
+label_file_explorer.pack(in_=top, side=LEFT) 
+button_explore.pack(in_=top, side=LEFT)  
 
 ########################################################################################
 spacer = Label(frame, text="", height =1)
-
 spacer.pack(pady=0, side= TOP, anchor="w")
 
 ########################################################################################
@@ -75,7 +67,6 @@ spacer.pack(pady=0, side= TOP, anchor="w")
 
 sample_label = Label(frame, text="Select How Report Samples are Grouped:", height =2)
 sample_label.pack(pady=0, side= TOP, anchor="w")
-
 label_radios = Label(frame)
 
 def sel():
@@ -84,7 +75,6 @@ def sel():
    label_radios.config(text = selection)
 
 var = IntVar()
-
 R1 = Radiobutton(frame, text="By Race ONLY", variable=var, value=1,
                   command=sel)
 R1.pack( anchor = W )
@@ -103,7 +93,6 @@ label_radios.pack()
 
 save_type_label = Label(frame, text="How Would You Like the Report(s) generated?", height =2)
 save_type_label.pack(pady=0, side= TOP, anchor="w")
-
 save_label_radios = Label(frame)
 
 def sel_repo():
@@ -112,7 +101,6 @@ def sel_repo():
    save_label_radios.config(text = selection)
 
 var2 = IntVar()
-
 R4 = Radiobutton(frame, text="All Together in One .csv File", variable=var2, value=4,
                   command=sel)
 R4.pack( anchor = W )
