@@ -19,9 +19,10 @@ export_report = []
 def open_import_file(filename, sample_grouping = "None", file_grouping ="None", output_file_name="RCV_Report"):
    with open(filename) as csv_file:
        csv_reader = csv.reader(csv_file, delimiter=',')
+       csv_reader_prepped = csv_reader[1:]
        line_count = 0
        start_index = 0
-       for ind1, row_raw in enumerate(csv_reader):
+       for ind1, row_raw in enumerate(csv_reader_prepped):
            if ind1 == 0:
                for ind2, element in enumerate(row_raw):
                    if element == "BallotType":
