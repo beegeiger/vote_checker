@@ -16,7 +16,7 @@ all_batches = []
 
 export_report = []
 
-def open_import_file(filename, sample_grouping = "None", file_grouping ="None", output_file_name="RCV_Report"):
+def open_import_file(filename, sample_grouping = "None", file_grouping ="None", output_file_name="RCV_Report", suspend_undervote="False"):
     with open(filename) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         line_count = 0
@@ -46,7 +46,7 @@ def open_import_file(filename, sample_grouping = "None", file_grouping ="None", 
             line_count += 1
         all_precincts.sort()
         all_batches.sort()
-    run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, sample_grouping, file_grouping, output_file_name)
+    run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, sample_grouping, file_grouping, output_file_name, suspend_undervote)
     return
 
 def write_exported_file(export_report, output_file_name):
@@ -59,7 +59,7 @@ def write_exported_file(export_report, output_file_name):
 
 input = [race_line, candidate_line, all_votes]
 
-def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, report_grouping = "None", file_grouping="Together", export_report_name="RCV_Report"):
+def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, report_grouping = "None", file_grouping="Together", export_report_name="RCV_Report", suspend_undervote="False"):
     races_only = check_races(race_line)
     races_with_info = check_rounds(races_only, candidate_line)
     for race in races_only:
@@ -86,7 +86,7 @@ def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_im
 
 
 
-def run_rcv_for_one_race_sample(race_from_races, race_ballots, sample_details_raw, qualified_write_in = False):
+def run_rcv_for_one_race_sample(race_from_races, race_ballots, sample_details_raw, suspend_undervote="False", qualified_write_in = "False"):
     if isinstance(sample_details_raw, str):
         sample_details = sample_details_raw.split("/")
         print("RUNNING RCV FOR SAMPLE:", sample_details)
@@ -105,9 +105,9 @@ def run_rcv_for_one_race_sample(race_from_races, race_ballots, sample_details_ra
         # print("RUN FOR ONE SAMPLE NEW LOOP: ", loop_no)
         # print("SUMMED ROUND BEFORE: ", summed_round[2:])
         if loop_no == 0:
-            summed_round = sum_round(race_from_races, race_ballots, -1, [], [])
+            summed_round = sum_round(race_from_races, race_ballots, -1, [], [], suspend_undervote)
         else:
-            summed_round = sum_round(race_from_races, post_elimination_round[0], loop_no, post_elimination_round[2], post_elimination_round[3])
+            summed_round = sum_round(race_from_races, post_elimination_round[0], loop_no, post_elimination_round[2], post_elimination_round[3], suspend_undervote)
         # print("SUMMED ROUND AFTER: ", summed_round[2:])
         if len(post_elimination_round) > 2 or loop_no == 10:
             if post_elimination_round[3][:-3].count("I") <= 2  or loop_no == 10:
@@ -121,14 +121,19 @@ def run_rcv_for_one_race_sample(race_from_races, race_ballots, sample_details_ra
                 # print("RUN FOR ONE SAMPLE completed.")
                 break
         # print("POST ELIM ROUND BEFORE: ", post_elimination_round)
-        if loop_no == 0:
+        if loop_no == 0 and suspend_undervote == "False":
             export_report.append(["Race","Precinct", "Batch", "Total Votes", "Round"] + summed_round[3] + ["", "Candidates Eliminated", "Round"] + summed_round[3] + ["", "Where Elimated Candidates Votes Go", "Round"] + summed_round[3])
+        elif loop_no == 0:
+            export_report.append(["Race","Precinct", "Batch", "Total Votes", "Round"] + summed_round[3] + ["New Suspended", "All Suspended"] + ["", "Candidates Eliminated", "Round"] + summed_round[3] + ["", "Where Elimated Candidates Votes Go", "Round"] + summed_round[3] + ["Suspended"])
         if loop_no == 0 and qualified_write_in == False:
-            post_elimination_round = round_elim(summed_round[1], summed_round[2], summed_round[3], summed_round[4], summed_round[5], True)
+            post_elimination_round = round_elim(summed_round[1], summed_round[2], summed_round[3], summed_round[4], summed_round[5], summed_round[6], True)
         else:
-            post_elimination_round = round_elim(summed_round[1], summed_round[2], summed_round[3], summed_round[4], summed_round[5])
+            post_elimination_round = round_elim(summed_round[1], summed_round[2], summed_round[3], summed_round[4], summed_round[5], summed_round[6])
         # print("POST ELIM ROUND AFTER: ", post_elimination_round[2:])
-        export_report.append([race_name, precinct, batch, sum(summed_round[5]), loop_no] + summed_round[5] + ["","", loop_no] + post_elimination_round[3] + ["", sum(post_elimination_round[4]), loop_no] + post_elimination_round[4])
+        if suspend_undervote == "False":
+            export_report.append([race_name, precinct, batch, sum(summed_round[5]), loop_no] + summed_round[5] + ["","", loop_no] + post_elimination_round[3] + ["", sum(post_elimination_round[4]), loop_no] + post_elimination_round[4])
+        else:
+            export_report.append([race_name, precinct, batch, sum(summed_round[5]), loop_no] + summed_round[5] + [summed_round[6][0], summed_round[6][1], "","", loop_no] + post_elimination_round[3] + ["", sum(post_elimination_round[4]), loop_no] + post_elimination_round[4] + [post_elimination_round[5][0]])
         # print("RUN FOR ONE SAMPLE Loop Ended: " , loop_no)
         loop_no += 1
 
@@ -250,8 +255,11 @@ def prepare_race_data_by_batch(all_ballots_from_race, race):
     all_batch_identifiers.sort()
     return [ballots_by_batch, all_batch_identifiers]
 
-def sum_round(race_from_races, race_votes, round_no = -1, categories = [], elimination_tracker =[]):
+def sum_round(race_from_races, race_votes, round_no = -1, categories = [], elimination_tracker =[], suspend_tracker="False"):
     """Outputs [race_from_races, ballot_tracker, round_no, categories, elimination_tracker, vote_tracker]"""
+    suspended_tracker = ["False"]
+    if suspend_tracker == "True":
+        suspended_tracker = [0, 0]
     race_indexes = race_from_races[0]
     candidates = race_from_races[1]
     race_name = race_from_races[-1]
@@ -284,6 +292,9 @@ def sum_round(race_from_races, race_votes, round_no = -1, categories = [], elimi
         elif ballot == ["OVERVOTE"]:
             ballot_tracker.append(["OVERVOTE"])
             vote_tracker[-1] += 1
+        elif ballot == ["SUSPENDED"]:
+            ballot_tracker.append(["SUSPENDED"])
+            suspended_tracker[1] += 1
         else:
             while ballot_counted == False:
                 if current_ballot == []:
@@ -300,8 +311,14 @@ def sum_round(race_from_races, race_votes, round_no = -1, categories = [], elimi
                     ballot_tracker.append(["OVERVOTE"])
                     ballot_counted = True
                 elif current_ballot[0].count("1") == 0:
-                    blank_tracker += 1
-                    current_ballot = current_ballot[1:]
+                    if suspend_tracker == ["False"]:
+                        blank_tracker += 1
+                        current_ballot = current_ballot[1:]
+                    else:
+                        ballot_tracker.append(["SUSPENDED"])
+                        suspended_tracker[0] += 1
+                        suspended_tracker[1] += 1
+                        ballot_counted = True
                 else:
                     vote_index = current_ballot[0].index("1")
                     if elimination_tracker[vote_index] != "x":
@@ -309,10 +326,12 @@ def sum_round(race_from_races, race_votes, round_no = -1, categories = [], elimi
                         ballot_tracker.append(current_ballot)
                         ballot_counted = True
     # print(str(len(race_votes)) + " Ballots Entered. " + str(sum(vote_tracker)) + "Votes Counted.")
-    return [race_from_races, ballot_tracker, round_no, categories, elimination_tracker, vote_tracker]
+    return [race_from_races, ballot_tracker, round_no, categories, elimination_tracker, vote_tracker, suspend_tracker]
 
 
-def round_elim(ballot_tracker, round_no, categories, elimination_tracker, vote_tracker, round_0_no_write_in = False):
+def round_elim(ballot_tracker, round_no, categories, elimination_tracker, vote_tracker, suspended_tracker=["False"], round_0_no_write_in = False):
+    if suspended_tracker != ["False"]:
+        suspended_tracker = [0,0]
     elim_index = 0
     if round_0_no_write_in == False or round_no > 0:
         pre_elim_tracker = []
@@ -341,7 +360,7 @@ def round_elim(ballot_tracker, round_no, categories, elimination_tracker, vote_t
     for ballot in ballot_tracker:
         # print("BALLOT: ", ballot, ballot_tracker)
         ballot_no += 1
-        if ballot == ["EXHAUSTED"] or ballot == ["OVERVOTE"] or ballot == ["BLANK"]:
+        if ballot == ["EXHAUSTED"] or ballot == ["OVERVOTE"] or ballot == ["BLANK"] or ballot == ["SUSPENDED"]:
             new_ballot_tracker.append(ballot)
         elif ballot[0][elim_index] == "1" and ballot[0].count("1") == 1:
             current_ballot = ballot[1:]
@@ -356,7 +375,12 @@ def round_elim(ballot_tracker, round_no, categories, elimination_tracker, vote_t
                     new_ballot_tracker.append(["OVERVOTE"])
                     ballot_counted = True
                 elif current_ballot[0].count("1") == 0:
-                    current_ballot = current_ballot[1:]
+                    if suspended_tracker == ["False"]
+                        current_ballot = current_ballot[1:]
+                    else:
+                        suspended_tracker[0] += 1
+                        new_ballot_tracker.append(["SUSPENDED"])
+                        ballot_counted = True
                 else:
                     vote_index = current_ballot[0].index("1")
                     if elimination_tracker[vote_index] != "x":
@@ -368,7 +392,7 @@ def round_elim(ballot_tracker, round_no, categories, elimination_tracker, vote_t
         else:
             new_ballot_tracker.append(ballot)
     # print("ROUND NO IN ROUND ELIM 2: ", round_no)
-    return [new_ballot_tracker, round_no, categories, elimination_tracker, where_elim_go]
+    return [new_ballot_tracker, round_no, categories, elimination_tracker, where_elim_go, suspended_tracker]
 
 
 
@@ -584,7 +608,7 @@ button_run.pack(in_=bottom, side=RIGHT)
 
 
 def run_alg_code(import_report, sample_grouping = "None", file_grouping ="None", output_file_name="RCV_Report", suspend_undervote = "False"):
-    open_import_file(import_report, sample_grouping, file_grouping, output_file_name)
+    open_import_file(import_report, sample_grouping, file_grouping, output_file_name, suspend_undervote)
     return
 
 frame2 = Frame(root)
