@@ -19,30 +19,32 @@ export_report = []
 def open_import_file(filename, sample_grouping = "None", file_grouping ="None", output_file_name="RCV_Report", suspend_undervote="False"):
     with open(filename) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
-        line_count = 0
+        line_count = -1
         start_index = 0
-        for ind1, row_raw in enumerate(csv_reader_prepped):
-            if ind1 == 0:
-                for ind2, element in enumerate(row_raw):
-                    if element == "BallotType":
-                        start_index = ind2 + 2
-            row = row_raw[start_index:]
-            entire_report_import.append(row_raw)
-            if line_count == 0:
-                race_line = row
-            elif line_count == 1:
-                candidate_line = row
-            elif line_count > 2 and row_raw[7] != "TOTAL":
-                ballot_id_split = row_raw[4].split("-")
-                batch = (ballot_id_split[0] + "-" + ballot_id_split[1])
-                ballot_info.append([row_raw[4], row_raw[6], batch])
-                if row_raw[4] not in all_races:
-                    all_races.append(row_raw[4])
-                if row_raw[6] not in all_precincts:
-                    all_precincts.append(row_raw[6])
-                if batch not in all_batches:
-                    all_batches.append(batch)
-                all_votes.append([[row_raw[4], row_raw[6], batch], row])
+        for ind0, row_raw in enumerate(csv_reader):
+            ind1 = ind0 - 1
+            if ind0 > 0:
+                if ind1 == 0:
+                    for ind2, element in enumerate(row_raw):
+                        if element == "BallotType":
+                            start_index = ind2 + 2
+                row = row_raw[start_index:]
+                entire_report_import.append(row_raw)
+                if line_count == 0:
+                    race_line = row
+                elif line_count == 1:
+                    candidate_line = row
+                elif line_count > 2 and row_raw[7] != "TOTAL":
+                    ballot_id_split = row_raw[4].split("-")
+                    batch = (ballot_id_split[0] + "-" + ballot_id_split[1])
+                    ballot_info.append([row_raw[4], row_raw[6], batch])
+                    if row_raw[4] not in all_races:
+                        all_races.append(row_raw[4])
+                    if row_raw[6] not in all_precincts:
+                        all_precincts.append(row_raw[6])
+                    if batch not in all_batches:
+                        all_batches.append(batch)
+                    all_votes.append([[row_raw[4], row_raw[6], batch], row])
             line_count += 1
         all_precincts.sort()
         all_batches.sort()
@@ -311,7 +313,7 @@ def sum_round(race_from_races, race_votes, round_no = -1, categories = [], elimi
                     ballot_tracker.append(["OVERVOTE"])
                     ballot_counted = True
                 elif current_ballot[0].count("1") == 0:
-                    if suspend_tracker == ["False"]:
+                    if suspended_tracker == ["False"]:
                         blank_tracker += 1
                         current_ballot = current_ballot[1:]
                     else:
@@ -326,7 +328,7 @@ def sum_round(race_from_races, race_votes, round_no = -1, categories = [], elimi
                         ballot_tracker.append(current_ballot)
                         ballot_counted = True
     # print(str(len(race_votes)) + " Ballots Entered. " + str(sum(vote_tracker)) + "Votes Counted.")
-    return [race_from_races, ballot_tracker, round_no, categories, elimination_tracker, vote_tracker, suspend_tracker]
+    return [race_from_races, ballot_tracker, round_no, categories, elimination_tracker, vote_tracker, suspended_tracker]
 
 
 def round_elim(ballot_tracker, round_no, categories, elimination_tracker, vote_tracker, suspended_tracker=["False"], round_0_no_write_in = False):
@@ -362,6 +364,7 @@ def round_elim(ballot_tracker, round_no, categories, elimination_tracker, vote_t
         ballot_no += 1
         if ballot == ["EXHAUSTED"] or ballot == ["OVERVOTE"] or ballot == ["BLANK"] or ballot == ["SUSPENDED"]:
             new_ballot_tracker.append(ballot)
+            if ballot == ["SUSPENDED"]:
         elif ballot[0][elim_index] == "1" and ballot[0].count("1") == 1:
             current_ballot = ballot[1:]
             ballot_counted = False
@@ -375,7 +378,7 @@ def round_elim(ballot_tracker, round_no, categories, elimination_tracker, vote_t
                     new_ballot_tracker.append(["OVERVOTE"])
                     ballot_counted = True
                 elif current_ballot[0].count("1") == 0:
-                    if suspended_tracker == ["False"]
+                    if suspended_tracker == ["False"]:
                         current_ballot = current_ballot[1:]
                     else:
                         suspended_tracker[0] += 1
@@ -488,19 +491,16 @@ sample_label = Label(frame, text="Select How Report Samples are Grouped:", heigh
 sample_label.pack(pady=0, side= TOP, anchor="w")
 label_radios = Label(frame)
 
-def sel():
-   label_radios.config(text = selection)
 
 var = IntVar(None, 1)
-R1 = Radiobutton(frame, text="By Race ONLY", variable=var, value=1, command=sel)
+R1 = Radiobutton(frame, text="By Race ONLY", variable=var, value=1)
 R1.pack( anchor = W )
 
-R2 = Radiobutton(frame, text="By Race and Precinct", variable=var, value=2,
-                  command=sel)
+R2 = Radiobutton(frame, text="By Race and Precinct", variable=var, value=2
+                  )
 R2.pack( anchor = W )
 
-R3 = Radiobutton(frame, text="By Race and Batch", variable=var, value=3,
-                  command=sel)
+R3 = Radiobutton(frame, text="By Race and Batch", variable=var, value=3)
 R3.pack( anchor = W)
 
 label_radios.pack()
@@ -513,12 +513,10 @@ save_label_radios = Label(frame)
 
 
 var2 = IntVar(None, 4)
-R4 = Radiobutton(frame, text="All Together in One .csv File", variable=var2, value=4,
-                  command=sel)
+R4 = Radiobutton(frame, text="All Together in One .csv File", variable=var2, value=4)
 R4.pack( anchor = W )
 
-R5 = Radiobutton(frame, text="Separate .csv Files for All Races", variable=var2, value=5,
-                  command=sel)
+R5 = Radiobutton(frame, text="Separate .csv Files for All Races", variable=var2, value=5)
 R5.pack( anchor = W )
 
 
@@ -531,12 +529,10 @@ suspend_label_radios = Label(frame)
 
 
 var3 = IntVar(None, 6)
-R6 = Radiobutton(frame, text="Continue Ballot Upon Undervoted Column", variable=var3, value=6,
-                  command=sel)
+R6 = Radiobutton(frame, text="Continue Ballot Upon Undervoted Column", variable=var3, value=6)
 R6.pack( anchor = W )
 
-R7 = Radiobutton(frame, text="Suspend Ballot (and the following columns will not count)", variable=var3, value=7,
-                  command=sel)
+R7 = Radiobutton(frame, text="Suspend Ballot (and the following columns will not count)", variable=var3, value=7)
 R7.pack( anchor = W )
 
 
