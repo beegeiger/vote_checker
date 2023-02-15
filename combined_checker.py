@@ -22,6 +22,7 @@ def clear_export_report():
     return
 
 def open_import_file(filename, sample_grouping = "None", file_grouping ="Together", output_file_name="RCV_Report", suspend_undervote="False"):
+    update_root()
     start = datetime.datetime.now()
     print("STARTING AT DATETIME: ", start)
     with open(filename) as csv_file:
@@ -29,6 +30,8 @@ def open_import_file(filename, sample_grouping = "None", file_grouping ="Togethe
         line_count = -1
         start_index = 0
         for ind0, row_raw in enumerate(csv_reader):
+            if ind0 % 50 == 0:
+                update_root()
             ind1 = ind0 - 1
             if ind0 > 0:
                 if ind1 == 0:
@@ -57,9 +60,12 @@ def open_import_file(filename, sample_grouping = "None", file_grouping ="Togethe
         all_batches.sort()
     run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, sample_grouping, file_grouping, output_file_name, suspend_undervote)
     end = datetime.datetime.now()
+    change = end-start
+    all_cells = len(all_votes)*len(race_line)
     print("ENDING AT DATETIME: ", end)
-    print("TOTAL TIME: ", start-end)
-    print("TOTAL CELLS PROCESSED: ", len(all_votes)*len(race_line))
+    print("TOTAL TIME: ", change)
+    print("TOTAL CELLS PROCESSED: ", all_cells)
+    print("TIME PER CELL: ", change/all_cells)
     return
 
 def write_exported_file(export_report, output_file_name):
@@ -76,6 +82,7 @@ def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_im
     races_only = check_races(race_line)
     races_with_info = check_rounds(races_only, candidate_line)
     for race in races_only:
+        update_root()
         if file_grouping == "Separate":
             clear_export_report()
         print("NEW RACE FROM RUN ENTIRE REPORT: ", race)
@@ -625,15 +632,30 @@ def run_alg_code(import_report, sample_grouping = "None", file_grouping ="Togeth
     open_import_file(import_report, sample_grouping, file_grouping, output_file_name, suspend_undervote)
     return
 
+def update_root():
+    root.update()
+    return
+
+def destroy_root():
+    root.destroy()
+    root.update()
+    return
+
 frame2 = Frame(root)
 processing_label = Label(frame2, text="The Report Is Being Run...\n This window will close automatically when the program is completed.", height =5, anchor="w")
 processing_label.pack()
+button_exit2 = Button(frame2,
+                        text = "Exit Program Before Completion",
+                        command =destroy_root)
+button_exit2.pack()
 
 def new_processing_frame():
-   frame.destroy()
-   frame2.pack(fill=BOTH, expand=True, padx=30, pady=25, side=TOP)
-   root.update()
-   print("Frame should have been forgotten now.")
-   return
+    frame.destroy()
+    frame2.pack(fill=BOTH, expand=True, padx=30, pady=25, side=TOP)
+    root.update()
+    print("Frame should have been forgotten now.")
+    return
+
+
 
 root.mainloop()
