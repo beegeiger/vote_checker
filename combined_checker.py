@@ -69,18 +69,18 @@ def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_im
         race_from_races = races_with_info[race]
         race_ballots = prepare_race_data(race_from_races, all_votes)
         if report_grouping == "None":
-            run_rcv_for_one_race_sample(race_from_races, race_ballots, [race, "ALL", "ALL"])
+            run_rcv_for_one_race_sample(race_from_races, race_ballots, [race, "ALL", "ALL"], suspend_undervote)
         elif report_grouping == "Precinct":
             prepared_precinct_data = prepare_race_data_by_precinct(race_ballots, race)
             race_ballots_by_precinct = prepared_precinct_data[0]
             all_precinct_idents = prepared_precinct_data[1]
             for ident in all_precinct_idents:
             #     # print("RACE BALLOTS BY PRECINCT: ", rbp, race_ballots_by_precinct[rbp])
-                run_rcv_for_one_race_sample(race_from_races, race_ballots_by_precinct[ident], ident)
+                run_rcv_for_one_race_sample(race_from_races, race_ballots_by_precinct[ident], ident, suspend_undervote)
         elif report_grouping == "Batch":
             race_ballots_by_batch = prepare_race_data_by_batch(race_ballots, race)
             for rbb in race_ballots_by_batch:
-                run_rcv_for_one_race_sample(race_from_races, race_ballots_by_batch[rbb], rbb)
+                run_rcv_for_one_race_sample(race_from_races, race_ballots_by_batch[rbb], rbb, suspend_undervote)
     write_exported_file(export_report, export_report_name)
     print("THE ALGORITHM HAS CONCLUDED AND YOUR FILE IS NOW READY!")
     root.destroy()
@@ -116,7 +116,10 @@ def run_rcv_for_one_race_sample(race_from_races, race_ballots, sample_details_ra
                 # print("TRIGGER 2")
                 highest_vote_count = max(summed_round[5])
                 highest_vote_index = summed_round[5].index(highest_vote_count)
-                export_report.append([race_name, precinct, batch, sum(summed_round[5]), loop_no] + summed_round[5] + ["","", loop_no] + post_elimination_round[3] + ["", sum(post_elimination_round[4]), loop_no] + post_elimination_round[4])
+                if suspend_undervote == "False":
+                    export_report.append([race_name, precinct, batch, sum(summed_round[5]), loop_no] + summed_round[5] + ["","", loop_no] + post_elimination_round[3] + ["", sum(post_elimination_round[4]), loop_no] + post_elimination_round[4])
+                else:
+                    export_report.append([race_name, precinct, batch, sum(summed_round[5])  + summed_round[6][1], loop_no] + summed_round[5] + [summed_round[6][0], summed_round[6][1], "","", loop_no] + post_elimination_round[3] + ["", sum(post_elimination_round[4]) + post_elimination_round[5][0], loop_no] + post_elimination_round[4] + [post_elimination_round[5][0]])
                 export_report.append(["", "", "", "WINNER: ", summed_round[3][highest_vote_index]])
                 export_report.append([])
                 all_rounds_complete = True
@@ -135,7 +138,7 @@ def run_rcv_for_one_race_sample(race_from_races, race_ballots, sample_details_ra
         if suspend_undervote == "False":
             export_report.append([race_name, precinct, batch, sum(summed_round[5]), loop_no] + summed_round[5] + ["","", loop_no] + post_elimination_round[3] + ["", sum(post_elimination_round[4]), loop_no] + post_elimination_round[4])
         else:
-            export_report.append([race_name, precinct, batch, sum(summed_round[5]), loop_no] + summed_round[5] + [summed_round[6][0], summed_round[6][1], "","", loop_no] + post_elimination_round[3] + ["", sum(post_elimination_round[4]), loop_no] + post_elimination_round[4] + [post_elimination_round[5][0]])
+            export_report.append([race_name, precinct, batch, sum(summed_round[5]) + summed_round[6][1], loop_no] + summed_round[5] + [summed_round[6][0], summed_round[6][1], "","", loop_no] + post_elimination_round[3] + ["", sum(post_elimination_round[4]) + post_elimination_round[5][0], loop_no] + post_elimination_round[4] + [post_elimination_round[5][0]])
         # print("RUN FOR ONE SAMPLE Loop Ended: " , loop_no)
         loop_no += 1
 
@@ -327,7 +330,7 @@ def sum_round(race_from_races, race_votes, round_no = -1, categories = [], elimi
                         vote_tracker[vote_index] += 1
                         ballot_tracker.append(current_ballot)
                         ballot_counted = True
-    # print(str(len(race_votes)) + " Ballots Entered. " + str(sum(vote_tracker)) + "Votes Counted.")
+    # print("FROM SUM ROUND: ", str(len(race_votes)) + " Ballots Entered. " + str(len(ballot_tracker)) + "Votes Counted.")
     return [race_from_races, ballot_tracker, round_no, categories, elimination_tracker, vote_tracker, suspended_tracker]
 
 
@@ -364,7 +367,6 @@ def round_elim(ballot_tracker, round_no, categories, elimination_tracker, vote_t
         ballot_no += 1
         if ballot == ["EXHAUSTED"] or ballot == ["OVERVOTE"] or ballot == ["BLANK"] or ballot == ["SUSPENDED"]:
             new_ballot_tracker.append(ballot)
-            if ballot == ["SUSPENDED"]:
         elif ballot[0][elim_index] == "1" and ballot[0].count("1") == 1:
             current_ballot = ballot[1:]
             ballot_counted = False
@@ -395,6 +397,7 @@ def round_elim(ballot_tracker, round_no, categories, elimination_tracker, vote_t
         else:
             new_ballot_tracker.append(ballot)
     # print("ROUND NO IN ROUND ELIM 2: ", round_no)
+    # print("ROUND ELIM: ", str(len(ballot_tracker)) + " Ballots Entered. " + str(len(new_ballot_tracker)) + "Votes Counted.")
     return [new_ballot_tracker, round_no, categories, elimination_tracker, where_elim_go, suspended_tracker]
 
 
@@ -573,7 +576,7 @@ def submit_input():
     elif var3.get() == 7:
        suspend_undervote = "True"
     output_file_input = input_txt.get()
-    print("SUBMIT INPUT: ", input_file_input, sample_grouping_input, file_grouping_input, output_file_input)
+    print("SUBMIT INPUT: ", input_file_input, sample_grouping_input, file_grouping_input, output_file_input, suspend_undervote)
     new_processing_frame()
     run_alg_code(input_file_input, sample_grouping_input, file_grouping_input, output_file_input, suspend_undervote)
     return

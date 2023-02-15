@@ -1,31 +1,31 @@
-Race,Precinct,Batch,Total Votes,Round,SENECA SCOTT,GREGORY HODGE,LOREN MANUEL TAYLOR,PETER Y. LIU,SHENG THAO,IGNACIO DE LA FUENTE,ALLYSSA VICTORY VILLANUEVA,JOHN REIMANN,TYRON C. JORDAN,TREVA D. REID,Write-in,Blanks,Exhausted,Overvote,,Candidates Eliminated,Round,SENECA SCOTT,GREGORY HODGE,LOREN MANUEL TAYLOR,PETER Y. LIU,SHENG THAO,IGNACIO DE LA FUENTE,ALLYSSA VICTORY VILLANUEVA,JOHN REIMANN,TYRON C. JORDAN,TREVA D. REID,Write-in,Blanks,Exhausted,Overvote,,Where Elimated Candidates Votes Go,Round,SENECA SCOTT,GREGORY HODGE,LOREN MANUEL TAYLOR,PETER Y. LIU,SHENG THAO,IGNACIO DE LA FUENTE,ALLYSSA VICTORY VILLANUEVA,JOHN REIMANN,TYRON C. JORDAN,TREVA D. REID,Write-in,Blanks,Exhausted,Overvote
-Mayor - Oakland ,ALL,ALL,18457,0,662,694,5860,228,5037,2147,1050,225,161,968,141,717,0,567,,,0,I,I,I,I,I,I,I,I,I,I,x,I,I,I,,141,0,7,7,21,2,18,18,10,1,4,13,0,0,31,9
-Mayor - Oakland ,ALL,ALL,18457,1,669,701,5881,230,5055,2165,1060,226,165,981,0,717,31,576,,,1,I,I,I,I,I,I,I,I,x,I,x,I,I,I,,165,1,7,11,16,8,14,27,18,7,0,30,0,0,19,8
-Mayor - Oakland ,ALL,ALL,18457,2,676,712,5897,238,5069,2192,1078,233,0,1011,0,717,50,584,,,2,I,I,I,I,I,I,I,x,x,I,x,I,I,I,,233,2,23,15,17,12,39,18,47,0,0,12,0,0,44,6
-Mayor - Oakland ,ALL,ALL,18457,3,699,727,5914,250,5108,2210,1125,0,0,1023,0,717,94,590,,,3,I,I,I,x,I,I,I,x,x,I,x,I,I,I,,250,3,32,17,27,0,65,19,12,0,0,21,0,0,48,9
-Mayor - Oakland ,ALL,ALL,18457,4,731,744,5941,0,5173,2229,1137,0,0,1044,0,717,142,599,,,4,x,I,I,x,I,I,I,x,x,I,x,I,I,I,,731,4,0,149,167,0,84,115,42,0,0,47,0,0,101,26
-Mayor - Oakland ,ALL,ALL,18457,5,0,893,6108,0,5257,2344,1179,0,0,1091,0,717,243,625,,,5,x,x,I,x,I,I,I,x,x,I,x,I,I,I,,893,5,0,0,226,0,164,101,144,0,0,94,0,0,129,35
-Mayor - Oakland ,ALL,ALL,18457,6,0,0,6334,0,5421,2445,1323,0,0,1185,0,717,372,660,,,6,x,x,I,x,I,I,I,x,x,x,x,I,I,I,,1185,6,0,0,365,0,257,165,156,0,0,0,0,0,222,20
-Mayor - Oakland ,ALL,ALL,18457,7,0,0,6699,0,5678,2610,1479,0,0,0,0,717,594,680,,,7,x,x,I,x,I,I,x,x,x,x,x,I,I,I,,1479,7,0,0,281,0,650,171,0,0,0,0,0,0,354,23
-Mayor - Oakland ,ALL,ALL,18457,8,0,0,6980,0,6328,2781,0,0,0,0,0,717,948,703,,,8,x,x,I,x,I,x,x,x,x,x,x,I,I,I,,2781,8,0,0,958,0,741,0,0,0,0,0,0,0,1016,66
-Mayor - Oakland ,ALL,ALL,18457,9,0,0,7938,0,7069,0,0,0,0,0,0,717,1964,769,,,9,x,x,I,x,I,x,x,x,x,x,x,I,I,I,,2781,9,0,0,958,0,741,0,0,0,0,0,0,0,1016,66
+Race,Precinct,Batch,Total Votes,Round,SENECA SCOTT,GREGORY HODGE,LOREN MANUEL TAYLOR,PETER Y. LIU,SHENG THAO,IGNACIO DE LA FUENTE,ALLYSSA VICTORY VILLANUEVA,JOHN REIMANN,TYRON C. JORDAN,TREVA D. REID,Write-in,Blanks,Exhausted,Overvote,New Suspended,All Suspended,,Candidates Eliminated,Round,SENECA SCOTT,GREGORY HODGE,LOREN MANUEL TAYLOR,PETER Y. LIU,SHENG THAO,IGNACIO DE LA FUENTE,ALLYSSA VICTORY VILLANUEVA,JOHN REIMANN,TYRON C. JORDAN,TREVA D. REID,Write-in,Blanks,Exhausted,Overvote,,Where Elimated Candidates Votes Go,Round,SENECA SCOTT,GREGORY HODGE,LOREN MANUEL TAYLOR,PETER Y. LIU,SHENG THAO,IGNACIO DE LA FUENTE,ALLYSSA VICTORY VILLANUEVA,JOHN REIMANN,TYRON C. JORDAN,TREVA D. REID,Write-in,Blanks,Exhausted,Overvote,Suspended
+Mayor - Oakland ,ALL,ALL,18457,0,655,689,5854,226,5031,2134,1047,224,159,967,141,0,0,545,785,785,,,0,I,I,I,I,I,I,I,I,I,I,x,I,I,I,,141,0,7,7,21,2,18,18,10,1,4,13,0,0,5,7,28
+Mayor - Oakland ,ALL,ALL,18457,1,662,696,5875,228,5049,2152,1057,225,163,980,0,0,5,552,0,813,,,1,I,I,I,I,I,I,I,I,x,I,x,I,I,I,,163,1,6,11,16,8,14,27,18,7,0,30,0,0,3,8,15
+Mayor - Oakland ,ALL,ALL,18457,2,668,707,5891,236,5063,2179,1075,232,0,1010,0,0,8,560,0,828,,,2,I,I,I,I,I,I,I,x,x,I,x,I,I,I,,232,2,23,15,17,12,39,18,47,0,0,12,0,0,3,4,42
+Mayor - Oakland ,ALL,ALL,18457,3,691,722,5908,248,5102,2197,1122,0,0,1022,0,0,11,564,0,870,,,3,I,I,I,x,I,I,I,x,x,I,x,I,I,I,,248,3,32,17,27,0,65,19,12,0,0,21,0,0,12,7,36
+Mayor - Oakland ,ALL,ALL,18457,4,723,739,5935,0,5167,2216,1134,0,0,1043,0,0,23,571,0,906,,,4,x,I,I,x,I,I,I,x,x,I,x,I,I,I,,723,4,0,146,167,0,83,114,41,0,0,46,0,0,14,19,93
+Mayor - Oakland ,ALL,ALL,18457,5,0,885,6102,0,5250,2330,1175,0,0,1089,0,0,37,590,0,999,,,5,x,x,I,x,I,I,I,x,x,I,x,I,I,I,,885,5,0,0,225,0,161,100,144,0,0,94,0,0,32,28,101
+Mayor - Oakland ,ALL,ALL,18457,6,0,0,6327,0,5411,2430,1319,0,0,1183,0,0,69,618,0,1100,,,6,x,x,I,x,I,I,I,x,x,x,x,I,I,I,,1183,6,0,0,364,0,257,164,156,0,0,0,0,0,77,15,150
+Mayor - Oakland ,ALL,ALL,18457,7,0,0,6691,0,5668,2594,1475,0,0,0,0,0,146,633,0,1250,,,7,x,x,I,x,I,I,x,x,x,x,x,I,I,I,,1475,7,0,0,279,0,648,169,0,0,0,0,0,0,133,19,227
+Mayor - Oakland ,ALL,ALL,18457,8,0,0,6970,0,6316,2763,0,0,0,0,0,0,279,652,0,1477,,,8,x,x,I,x,I,x,x,x,x,x,x,I,I,I,,2763,8,0,0,955,0,735,0,0,0,0,0,0,0,394,54,625
+Mayor - Oakland ,ALL,ALL,18457,9,0,0,7925,0,7051,0,0,0,0,0,0,0,673,706,0,2102,,,9,x,x,I,x,I,x,x,x,x,x,x,I,I,I,,2763,9,0,0,955,0,735,0,0,0,0,0,0,0,394,54,625
 ,,,WINNER: ,LOREN MANUEL TAYLOR
 
-Race,Precinct,Batch,Total Votes,Round,MIKE HUTCHINSON,PECOLIA MANIGO,NICK RESNICK,Write-in,Blanks,Exhausted,Overvote,,Candidates Eliminated,Round,MIKE HUTCHINSON,PECOLIA MANIGO,NICK RESNICK,Write-in,Blanks,Exhausted,Overvote,,Where Elimated Candidates Votes Go,Round,MIKE HUTCHINSON,PECOLIA MANIGO,NICK RESNICK,Write-in,Blanks,Exhausted,Overvote
-"School Director, Dist. 4 - Oakland ",ALL,ALL,5153,0,1631,968,1788,58,674,0,34,,,0,I,I,I,x,I,I,I,,58,0,19,2,6,0,0,31,0
-"School Director, Dist. 4 - Oakland ",ALL,ALL,5153,1,1650,970,1794,0,674,31,34,,,1,I,x,I,x,I,I,I,,970,1,435,0,313,0,0,217,5
-"School Director, Dist. 4 - Oakland ",ALL,ALL,5153,2,2085,0,2107,0,674,248,39,,,2,I,x,I,x,I,I,I,,970,2,435,0,313,0,0,217,5
+Race,Precinct,Batch,Total Votes,Round,MIKE HUTCHINSON,PECOLIA MANIGO,NICK RESNICK,Write-in,Blanks,Exhausted,Overvote,New Suspended,All Suspended,,Candidates Eliminated,Round,MIKE HUTCHINSON,PECOLIA MANIGO,NICK RESNICK,Write-in,Blanks,Exhausted,Overvote,,Where Elimated Candidates Votes Go,Round,MIKE HUTCHINSON,PECOLIA MANIGO,NICK RESNICK,Write-in,Blanks,Exhausted,Overvote,Suspended
+"School Director, Dist. 4 - Oakland ",ALL,ALL,5153,0,1615,957,1780,58,0,0,32,711,711,,,0,I,I,I,x,I,I,I,,58,0,19,2,6,0,0,4,0,27
+"School Director, Dist. 4 - Oakland ",ALL,ALL,5153,1,1634,959,1786,0,0,4,32,0,738,,,1,I,x,I,x,I,I,I,,959,1,428,0,308,0,0,11,3,209
+"School Director, Dist. 4 - Oakland ",ALL,ALL,5153,2,2062,0,2094,0,0,15,35,0,947,,,2,I,x,I,x,I,I,I,,959,2,428,0,308,0,0,11,3,209
 ,,,WINNER: ,NICK RESNICK
 
-Race,Precinct,Batch,Total Votes,Round,BRYAN AZEVEDO,CHRISTOPHER BAMMER,LEE THOMAS,"JUAN GONZALEZ, III",Write-in,Blanks,Exhausted,Overvote,,Candidates Eliminated,Round,BRYAN AZEVEDO,CHRISTOPHER BAMMER,LEE THOMAS,"JUAN GONZALEZ, III",Write-in,Blanks,Exhausted,Overvote,,Where Elimated Candidates Votes Go,Round,BRYAN AZEVEDO,CHRISTOPHER BAMMER,LEE THOMAS,"JUAN GONZALEZ, III",Write-in,Blanks,Exhausted,Overvote
-Mayor - San Leandro ,ALL,ALL,3107,0,1263,83,594,908,20,191,0,48,,,0,I,I,I,I,x,I,I,I,,20,0,6,0,3,2,0,0,9,0
-Mayor - San Leandro ,ALL,ALL,3107,1,1269,83,597,910,0,191,9,48,,,1,I,x,I,I,x,I,I,I,,83,1,24,0,25,14,0,0,20,0
-Mayor - San Leandro ,ALL,ALL,3107,2,1293,0,622,924,0,191,29,48,,,2,I,x,x,I,x,I,I,I,,622,2,239,0,0,224,0,0,151,8
-Mayor - San Leandro ,ALL,ALL,3107,3,1532,0,0,1148,0,191,180,56,,,3,I,x,x,I,x,I,I,I,,622,3,239,0,0,224,0,0,151,8
+Race,Precinct,Batch,Total Votes,Round,BRYAN AZEVEDO,CHRISTOPHER BAMMER,LEE THOMAS,"JUAN GONZALEZ, III",Write-in,Blanks,Exhausted,Overvote,New Suspended,All Suspended,,Candidates Eliminated,Round,BRYAN AZEVEDO,CHRISTOPHER BAMMER,LEE THOMAS,"JUAN GONZALEZ, III",Write-in,Blanks,Exhausted,Overvote,,Where Elimated Candidates Votes Go,Round,BRYAN AZEVEDO,CHRISTOPHER BAMMER,LEE THOMAS,"JUAN GONZALEZ, III",Write-in,Blanks,Exhausted,Overvote,Suspended
+Mayor - San Leandro ,ALL,ALL,3107,0,1256,81,583,906,19,0,0,42,220,220,,,0,I,I,I,I,x,I,I,I,,19,0,6,0,3,1,0,0,4,0,5
+Mayor - San Leandro ,ALL,ALL,3107,1,1262,81,586,907,0,0,4,42,0,225,,,1,I,x,I,I,x,I,I,I,,81,1,23,0,25,13,0,0,4,0,16
+Mayor - San Leandro ,ALL,ALL,3107,2,1285,0,611,920,0,0,8,42,0,241,,,2,I,x,x,I,x,I,I,I,,611,2,237,0,0,219,0,0,16,3,136
+Mayor - San Leandro ,ALL,ALL,3107,3,1522,0,0,1139,0,0,24,45,0,377,,,3,I,x,x,I,x,I,I,I,,611,3,237,0,0,219,0,0,16,3,136
 ,,,WINNER: ,BRYAN AZEVEDO
 
-Race,Precinct,Batch,Total Votes,Round,XOUHOA BOWEN,MONIQUE TATE,Write-in,Blanks,Exhausted,Overvote,,Candidates Eliminated,Round,XOUHOA BOWEN,MONIQUE TATE,Write-in,Blanks,Exhausted,Overvote,,Where Elimated Candidates Votes Go,Round,XOUHOA BOWEN,MONIQUE TATE,Write-in,Blanks,Exhausted,Overvote
-"Member, City Council, Dist. 5 - San Leandro ",ALL,ALL,3107,0,1146,1451,23,464,0,23,,,0,I,I,x,I,I,I,,23,0,5,6,0,0,11,1
-"Member, City Council, Dist. 5 - San Leandro ",ALL,ALL,3107,1,1151,1457,0,464,11,24,,,1,I,I,x,I,I,I,,23,1,5,6,0,0,11,1
+Race,Precinct,Batch,Total Votes,Round,XOUHOA BOWEN,MONIQUE TATE,Write-in,Blanks,Exhausted,Overvote,New Suspended,All Suspended,,Candidates Eliminated,Round,XOUHOA BOWEN,MONIQUE TATE,Write-in,Blanks,Exhausted,Overvote,,Where Elimated Candidates Votes Go,Round,XOUHOA BOWEN,MONIQUE TATE,Write-in,Blanks,Exhausted,Overvote,Suspended
+"Member, City Council, Dist. 5 - San Leandro ",ALL,ALL,3107,0,1115,1415,22,0,0,15,540,540,,,0,I,I,x,I,I,I,,22,0,5,5,0,0,3,0,9
+"Member, City Council, Dist. 5 - San Leandro ",ALL,ALL,3107,1,1120,1420,0,0,3,15,0,549,,,1,I,I,x,I,I,I,,22,1,5,5,0,0,3,0,9
 ,,,WINNER: ,MONIQUE TATE
 
