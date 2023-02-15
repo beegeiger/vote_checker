@@ -16,7 +16,11 @@ all_batches = []
 
 export_report = []
 
-def open_import_file(filename, sample_grouping = "None", file_grouping ="None", output_file_name="RCV_Report", suspend_undervote="False"):
+def clear_export_report():
+    export_report = []
+    return
+
+def open_import_file(filename, sample_grouping = "None", file_grouping ="Together", output_file_name="RCV_Report", suspend_undervote="False"):
     with open(filename) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         line_count = -1
@@ -65,6 +69,8 @@ def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_im
     races_only = check_races(race_line)
     races_with_info = check_rounds(races_only, candidate_line)
     for race in races_only:
+        if file_grouping == "Separate":
+            clear_export_report()
         print("NEW RACE FROM RUN ENTIRE REPORT: ", race)
         race_from_races = races_with_info[race]
         race_ballots = prepare_race_data(race_from_races, all_votes)
@@ -81,7 +87,10 @@ def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_im
             race_ballots_by_batch = prepare_race_data_by_batch(race_ballots, race)
             for rbb in race_ballots_by_batch:
                 run_rcv_for_one_race_sample(race_from_races, race_ballots_by_batch[rbb], rbb, suspend_undervote)
-    write_exported_file(export_report, export_report_name)
+        if file_grouping == "Separate":
+            write_exported_file(export_report, export_report_name + " - " + race)
+    if file_grouping == "Together":
+        write_exported_file(export_report, export_report_name)
     print("THE ALGORITHM HAS CONCLUDED AND YOUR FILE IS NOW READY!")
     root.destroy()
     return export_report
@@ -141,8 +150,7 @@ def run_rcv_for_one_race_sample(race_from_races, race_ballots, sample_details_ra
             export_report.append([race_name, precinct, batch, sum(summed_round[5]) + summed_round[6][1], loop_no] + summed_round[5] + [summed_round[6][0], summed_round[6][1], "","", loop_no] + post_elimination_round[3] + ["", sum(post_elimination_round[4]) + post_elimination_round[5][0], loop_no] + post_elimination_round[4] + [post_elimination_round[5][0]])
         # print("RUN FOR ONE SAMPLE Loop Ended: " , loop_no)
         loop_no += 1
-
-    return sample_report
+    return
 
 
 
@@ -576,7 +584,7 @@ def submit_input():
     elif var3.get() == 7:
        suspend_undervote = "True"
     output_file_input = input_txt.get()
-    print("SUBMIT INPUT: ", input_file_input, sample_grouping_input, file_grouping_input, output_file_input, suspend_undervote)
+    print("SUBMIT INPUT: ", input_file_input_raw, sample_grouping_input, file_grouping_input, output_file_input, suspend_undervote)
     new_processing_frame()
     run_alg_code(input_file_input, sample_grouping_input, file_grouping_input, output_file_input, suspend_undervote)
     return
@@ -606,7 +614,7 @@ button_run.pack(in_=bottom, side=RIGHT)
 
 
 
-def run_alg_code(import_report, sample_grouping = "None", file_grouping ="None", output_file_name="RCV_Report", suspend_undervote = "False"):
+def run_alg_code(import_report, sample_grouping = "None", file_grouping ="Together", output_file_name="RCV_Report", suspend_undervote = "False"):
     open_import_file(import_report, sample_grouping, file_grouping, output_file_name, suspend_undervote)
     return
 
