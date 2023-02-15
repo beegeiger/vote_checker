@@ -1,4 +1,5 @@
 import csv
+import datetime
 from tkinter import *
 
 # import filedialog module
@@ -21,6 +22,8 @@ def clear_export_report():
     return
 
 def open_import_file(filename, sample_grouping = "None", file_grouping ="Together", output_file_name="RCV_Report", suspend_undervote="False"):
+    start = datetime.datetime.now()
+    print("STARTING AT DATETIME: ", start)
     with open(filename) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         line_count = -1
@@ -53,6 +56,10 @@ def open_import_file(filename, sample_grouping = "None", file_grouping ="Togethe
         all_precincts.sort()
         all_batches.sort()
     run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, sample_grouping, file_grouping, output_file_name, suspend_undervote)
+    end = datetime.datetime.now()
+    print("ENDING AT DATETIME: ", end)
+    print("TOTAL TIME: ", start-end)
+    print("TOTAL CELLS PROCESSED: ", len(all_votes)*len(race_line))
     return
 
 def write_exported_file(export_report, output_file_name):
