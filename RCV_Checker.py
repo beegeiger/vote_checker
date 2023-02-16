@@ -16,6 +16,7 @@ all_precincts = []
 all_batches = []
 
 export_report = []
+tkinter_file_input_name = ""
 
 def clear_export_report():
     export_report = []
@@ -23,38 +24,48 @@ def clear_export_report():
 
 def open_import_file(filename, sample_grouping = "None", file_grouping ="Together", output_file_name="RCV_Report", suspend_undervote="False"):
     update_root()
+    global race_line
+    global candidate_line
+    global all_votes
+    global entire_report_import
+    global ballot_info
+    global all_races
+    global all_precincts
+    global all_batches
     start = datetime.datetime.now()
     print("STARTING AT DATETIME: ", start)
+    print("FILENAME: ", filename)
     with open(filename) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
-        line_count = -1
+        line_count = 0
         start_index = 0
         for ind0, row_raw in enumerate(csv_reader):
+            if ind0 == 0 and row_raw == [] or row_raw[:4] == ["","","","",""]:
+                line_count -= 1
             if ind0 % 50 == 0:
                 update_root()
             ind1 = ind0 - 1
-            if ind0 > 0:
-                if ind1 == 0:
-                    for ind2, element in enumerate(row_raw):
-                        if element == "BallotType":
-                            start_index = ind2 + 2
-                row = row_raw[start_index:]
-                entire_report_import.append(row_raw)
-                if line_count == 0:
-                    race_line = row
-                elif line_count == 1:
-                    candidate_line = row
-                elif line_count > 2 and row_raw[7] != "TOTAL":
-                    ballot_id_split = row_raw[4].split("-")
-                    batch = (ballot_id_split[0] + "-" + ballot_id_split[1])
-                    ballot_info.append([row_raw[4], row_raw[6], batch])
-                    if row_raw[4] not in all_races:
-                        all_races.append(row_raw[4])
-                    if row_raw[6] not in all_precincts:
-                        all_precincts.append(row_raw[6])
-                    if batch not in all_batches:
-                        all_batches.append(batch)
-                    all_votes.append([[row_raw[4], row_raw[6], batch], row])
+            if line_count == 0:
+                for ind2, element in enumerate(row_raw):
+                    if element == "BallotType":
+                        start_index = ind2 + 2
+            row = row_raw[start_index:]
+            entire_report_import.append(row_raw)
+            if line_count == 0:
+                race_line = row
+            elif line_count == 1:
+                candidate_line = row
+            elif line_count > 2 and row_raw[7] != "TOTAL":
+                ballot_id_split = row_raw[4].split("-")
+                batch = (ballot_id_split[0] + "-" + ballot_id_split[1])
+                ballot_info.append([row_raw[4], row_raw[6], batch])
+                if row_raw[4] not in all_races:
+                    all_races.append(row_raw[4])
+                if row_raw[6] not in all_precincts:
+                    all_precincts.append(row_raw[6])
+                if batch not in all_batches:
+                    all_batches.append(batch)
+                all_votes.append([[row_raw[4], row_raw[6], batch], row])
             line_count += 1
         all_precincts.sort()
         all_batches.sort()
@@ -65,7 +76,6 @@ def open_import_file(filename, sample_grouping = "None", file_grouping ="Togethe
     print("ENDING AT DATETIME: ", end)
     print("TOTAL TIME: ", change)
     print("TOTAL CELLS PROCESSED: ", all_cells)
-    print("TIME PER CELL: ", change/all_cells)
     write_to_log(change, all_cells, len(all_votes), len(race_line), len(all_races))
     return
 
@@ -487,7 +497,7 @@ file_label.pack(pady=0, side= TOP, anchor="w")
 top = Frame(frame)
 top.pack(side=TOP)
 
-tkinter_file_input_name = ""
+
 
 def browseFiles():
     filename = filedialog.askopenfilename(initialdir = "./",
@@ -501,10 +511,11 @@ def browseFiles():
 
     # Change label contents
     label_file_explorer.configure(text="File Selected: " + filename, wraplength=325)
+    global tkinter_file_input_name
     tkinter_file_input_name = filename
     print("FILENAME, TKINTER FILE NAME: ", filename, tkinter_file_input_name)
     print("File Opened: ", filename)
-
+    return
 
 
 
@@ -591,11 +602,13 @@ input_txt.pack()
 
 ##########################################################################################
 def submit_input():
+    global tkinter_file_input_name
     print("VAR: ", var, var2, var.get(), var2.get())
-    input_file_input_raw = label_file_explorer['text']
-    input_raw_list = input_file_input_raw.split(":")
-    input_raw_list2 = input_raw_list[1].split("/")
-    input_file_input = input_raw_list2[-1]
+    print("INPUT FILE NAME: ", tkinter_file_input_name)
+    input_file_input_raw = tkinter_file_input_name
+    # input_raw_list = input_file_input_raw.split(":")
+    # input_raw_list2 = input_raw_list[1].split("/")
+    # input_file_input = input_raw_list2[-1]
     sample_grouping_input = ""
     file_grouping_input = ""
     suspend_undervote = ""
@@ -616,7 +629,7 @@ def submit_input():
     output_file_input = input_txt.get()
     print("SUBMIT INPUT: ", input_file_input_raw, sample_grouping_input, file_grouping_input, output_file_input, suspend_undervote)
     new_processing_frame()
-    run_alg_code(input_file_input, sample_grouping_input, file_grouping_input, output_file_input, suspend_undervote)
+    run_alg_code(input_file_input_raw, sample_grouping_input, file_grouping_input, output_file_input, suspend_undervote)
     return
 
 
