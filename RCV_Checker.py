@@ -34,7 +34,7 @@ def open_import_file(filename, sample_grouping = "None", file_grouping ="Togethe
     global all_batches
     start = datetime.datetime.now()
     print("STARTING AT DATETIME: ", start)
-    print("FILENAME: ", filename)
+    print("Reading Input File and Compiling Data...")
     with open(filename) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         line_count = 0
@@ -76,28 +76,30 @@ def open_import_file(filename, sample_grouping = "None", file_grouping ="Togethe
     print("ENDING AT DATETIME: ", end)
     print("TOTAL TIME: ", change)
     print("TOTAL CELLS PROCESSED: ", all_cells)
-    write_to_log(change, all_cells, len(all_votes), len(race_line), len(all_races))
+    write_to_log(change, all_cells, len(all_votes), len(race_line), sample_grouping, file_grouping, suspend_undervote, filename, output_file_name)
     return
 
-def write_to_log(total_time, total_cells, number_ballots, number_columns, number_races):
+def write_to_log(total_time, total_cells, number_ballots, number_columns, sample_grouping, file_grouping, suspend_undervote, filename, output_file_name):
+    print("Writing Report Info to Log.")
     log = []
-    with open("RCV_Checker_Log") as csv_file:
+    with open("RCV_Checker_Log.csv") as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         for line in csv_reader:
             log.append(line)
     if len(log) == 0:
-        log.append(["Total Time", "Total Cells", "Number of Ballots", "Number of Columns", "Number of Races"])
-    log.append([total_time, total_cells, number_ballots, number_columns, number_races])
-    with open("RCV_Checker_Log", 'w') as f:
+        log.append(["Total Time", "Total Cells", "Number of Ballots", "Number of Columns", "Sample Grouping", "File Grouping", "Suspend Undervote?", "Input File Name", "output_file_name"])
+    log.append([total_time, total_cells, number_ballots, number_columns, sample_grouping, file_grouping, suspend_undervote, filename, output_file_name])
+    with open("RCV_Checker_Log.csv", 'w') as f:
         # using csv.writer method from CSV package
         write = csv.writer(f)
         write.writerows(log)
     return
 
 def write_exported_file(export_report, output_file_name):
-    with open(output_file_name, 'w') as f:
+    with open(output_file_name + ".csv", 'w', newline='') as f:
       # using csv.writer method from CSV package
       write = csv.writer(f)
+      print("EXPORT REPORT: ", export_report)
       write.writerows(export_report)
     return
 
@@ -105,13 +107,14 @@ def write_exported_file(export_report, output_file_name):
 input = [race_line, candidate_line, all_votes]
 
 def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, report_grouping = "None", file_grouping="Together", export_report_name="RCV_Report", suspend_undervote="False"):
+    print("Race Data is being grouped and consolidated...")
     races_only = check_races(race_line)
     races_with_info = check_rounds(races_only, candidate_line)
     for race in races_only:
         update_root()
         if file_grouping == "Separate":
             clear_export_report()
-        print("NEW RACE FROM RUN ENTIRE REPORT: ", race)
+        print("Current Race Being Processed: ", race)
         race_from_races = races_with_info[race]
         race_ballots = prepare_race_data(race_from_races, all_votes)
         if report_grouping == "None":
@@ -124,9 +127,11 @@ def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_im
             #     # print("RACE BALLOTS BY PRECINCT: ", rbp, race_ballots_by_precinct[rbp])
                 run_rcv_for_one_race_sample(race_from_races, race_ballots_by_precinct[ident], ident, suspend_undervote)
         elif report_grouping == "Batch":
-            race_ballots_by_batch = prepare_race_data_by_batch(race_ballots, race)
-            for rbb in race_ballots_by_batch:
-                run_rcv_for_one_race_sample(race_from_races, race_ballots_by_batch[rbb], rbb, suspend_undervote)
+            prepared_batch_data = prepare_race_data_by_batch(race_ballots, race)
+            race_ballots_by_batch = prepared_batch_data[0]
+            all_batch_idents = prepared_batch_data[1]
+            for iden in all_batch_idents:
+                run_rcv_for_one_race_sample(race_from_races, race_ballots_by_batch[iden], iden, suspend_undervote)
         if file_grouping == "Separate":
             write_exported_file(export_report, export_report_name + " - " + race)
     if file_grouping == "Together":
@@ -140,7 +145,6 @@ def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_im
 def run_rcv_for_one_race_sample(race_from_races, race_ballots, sample_details_raw, suspend_undervote="False", qualified_write_in = "False"):
     if isinstance(sample_details_raw, str):
         sample_details = sample_details_raw.split("/")
-        print("RUNNING RCV FOR SAMPLE:", sample_details)
     else:
         sample_details = sample_details_raw
     race_name = sample_details[0]
@@ -277,6 +281,7 @@ def prepare_race_data(race_from_races, all_votes):
     return all_ballots
 
 def prepare_race_data_by_precinct(all_ballots_from_race, race):
+    print("Grouping Data By Precinct for Race: ", race)
     ballots_by_precinct = {}
     all_precinct_identifiers = []
     for whole_row_info in all_ballots_from_race:
@@ -293,13 +298,14 @@ def prepare_race_data_by_precinct(all_ballots_from_race, race):
     return [ballots_by_precinct, all_precinct_identifiers]
 
 def prepare_race_data_by_batch(all_ballots_from_race, race):
+    print("Grouping Data By Batch for Race: ", race)
     ballots_by_batch = {}
     all_batch_identifiers = []
     for whole_row_info in all_ballots_from_race:
         ballot_info = whole_row_info[0]
         whole_row = whole_row_info[1]
         identifier = str(race) + "/ALL/" + str(ballot_info[2])
-        if identifier not in all_precinct_identifiers:
+        if identifier not in all_batch_identifiers:
             all_batch_identifiers.append(identifier)
         if identifier in ballots_by_batch:
             ballots_by_batch[identifier] = list(ballots_by_batch[identifier]) + [whole_row_info]
@@ -513,8 +519,6 @@ def browseFiles():
     label_file_explorer.configure(text="File Selected: " + filename, wraplength=325)
     global tkinter_file_input_name
     tkinter_file_input_name = filename
-    print("FILENAME, TKINTER FILE NAME: ", filename, tkinter_file_input_name)
-    print("File Opened: ", filename)
     return
 
 
@@ -603,8 +607,8 @@ input_txt.pack()
 ##########################################################################################
 def submit_input():
     global tkinter_file_input_name
-    print("VAR: ", var, var2, var.get(), var2.get())
-    print("INPUT FILE NAME: ", tkinter_file_input_name)
+    # print("VAR: ", var, var2, var.get(), var2.get())
+    # print("INPUT FILE NAME: ", tkinter_file_input_name)
     input_file_input_raw = tkinter_file_input_name
     # input_raw_list = input_file_input_raw.split(":")
     # input_raw_list2 = input_raw_list[1].split("/")
@@ -627,7 +631,7 @@ def submit_input():
     elif var3.get() == 7:
        suspend_undervote = "True"
     output_file_input = input_txt.get()
-    print("SUBMIT INPUT: ", input_file_input_raw, sample_grouping_input, file_grouping_input, output_file_input, suspend_undervote)
+    # print("SUBMIT INPUT: ", input_file_input_raw, sample_grouping_input, file_grouping_input, output_file_input, suspend_undervote)
     new_processing_frame()
     run_alg_code(input_file_input_raw, sample_grouping_input, file_grouping_input, output_file_input, suspend_undervote)
     return
@@ -682,9 +686,10 @@ def new_processing_frame():
     frame.destroy()
     frame2.pack(fill=BOTH, expand=True, padx=30, pady=25, side=TOP)
     root.update()
-    print("Frame should have been forgotten now.")
+    # print("Frame should have been forgotten now.")
     return
 
 
 
 root.mainloop()
+
