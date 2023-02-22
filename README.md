@@ -18,9 +18,26 @@ The VCR spreadsheet should be consistent with VCR reports exported from a Domini
 ### 3. Using the "Browse Files" button, select the input .csv file.
 
 ### 4. Select how you would like your race data grouped:
-#### By Race ONLY
+#### By Race ONLY (Default)
 Choosing this option will have the algorithm simply combine all voting data (ignoring precinct or batch) to calculate the overall race outcomes (for each race separately).
 #### By Race and Precinct
 Choosing this option will have the algorithm not only group the data by race, but will further divide the data by precinct so the report will show the result of the algorithm as if it had been run separately for each precinct. 
 #### By Race and Batch
 Choosing this option will have the algorithm not only group the data by race, but will further divide the data by batch so the report will show the result of the algorithm as if it had been run separately for each batch. 
+
+### 5. Select how you would line your report(s) generated:
+#### All Together in One .csv File:
+Choosing this option will produce the output data altogether in one file.
+#### Separate .csv Files for All Races:
+Choosing this option will produce a separate .csv report file for each race with the name of each file being "[Your Ouput File Name] [Name of Race].csv"
+
+### 6. Select how undervotes should be handled by the algorithm:
+#### Continue Ballot Upon Undervoted Column:
+If the first choice on a ballot is undervoted, but the race is not blank, the algorithm keeps moving onto the next column until it reaches a voted column and/or the ballot is exhausted.
+#### Suspend Ballot (and the following columns will not count) - IN BETA:
+If the first column is blank for a race, but the race is not blank, the ballot gets put in the "Suspended Ballot" and is not counted. Note: This feature is in beta doesn't appear to act exactly like the Dominion algorithm yet, so use with caution.
+
+### 7. In the text box in the bottom of the window, enter the name you would like for your report being generated. The ".csv" part of the name will be added automatically. Note: if you choose the same name as a report already in your RCV checker folder, the original report will be over-written.
+
+### 8. Click the "Run Report" Button
+Once it begins, if you close out either window opened by the program, it will kill it and no report will be generated. If you let it run through, depending on the size of your sample, the program will take anywhere from 2 to 20 minutes to complete. Once it does complete, both windows will dissapear and your new report should be in RCV Checker folder where the python script is.
