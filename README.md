@@ -2,7 +2,7 @@
 #### Small Python program that will accept a VCR (Vote Count Record) .csv report exported from the Dominion system. The program then runs the RCV algorithm (as set by the user) and then outputs the report(s) for all RCV races included in the report. This was designed as a way to 1. Quickly produce reports broken down by precinct in case a recount by precinct is called, 2. Quickly produce reports broken down by batch in case a recount by batch is called, 3. Quickly produce reports that can be used to double-check the original Dominion algorithm, and 4. Produce reports both overall and by precinct so that the RCV algorithm can be run in smaller samples, allowing campaigns and other political/social/educational entities to do focused studies of how different precincts voted. 
 
 ## Instructions For Use:
-### 1. Download this repo, unzip the folder, an open it.
+### 1. Download this repo, unzip the folder, and open it.
 
 ### 2. Prepare Your VCR Input File:
 The VCR input file should be in the basic ".csv" filetype (you can save any spreadsheet as a .csv in any spreadsheet program).
