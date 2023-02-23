@@ -69,6 +69,7 @@ def open_import_file(filename, sample_grouping = "None", file_grouping ="Togethe
                 candidate_line = row
             elif line_count > 2 and row_raw[7] != "TOTAL":
                 ballot_id_split = row_raw[4].split("-")
+                # print("BALLOT ID SPLIT: ", ballot_id_split, row_raw[4])
                 batch = (ballot_id_split[0] + "-" + ballot_id_split[1])
                 ballot_info.append([row_raw[4], row_raw[6], batch])
                 if row_raw[4] not in all_races:
