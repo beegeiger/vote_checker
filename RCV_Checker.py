@@ -14,6 +14,8 @@ ballot_info = []
 all_races = []
 all_precincts = []
 all_batches = []
+time_per_10000 = []
+races_only = []
 
 export_report = []
 tkinter_file_input_name = ""
@@ -24,6 +26,7 @@ def clear_export_report():
 
 def open_import_file(filename, sample_grouping = "None", file_grouping ="Together", output_file_name="RCV_Report", suspend_undervote="False"):
     update_root()
+    time_tracker = datetime.datetime.now()
     global race_line
     global candidate_line
     global all_votes
@@ -32,6 +35,7 @@ def open_import_file(filename, sample_grouping = "None", file_grouping ="Togethe
     global all_races
     global all_precincts
     global all_batches
+    global time_per_10000
     start = datetime.datetime.now()
     print("STARTING AT DATETIME: ", start)
     print("Reading Input File and Compiling Data...")
@@ -40,6 +44,14 @@ def open_import_file(filename, sample_grouping = "None", file_grouping ="Togethe
         line_count = 0
         start_index = 0
         for ind0, row_raw in enumerate(csv_reader):
+            if line_count % 1000 == 0 and line_count > 0:
+                if line_count < 9500:
+                    print("Importing Data; Currently on ballot number: ", line_count)
+                elif line_count % 10000 == 0:
+                    time_taken =  datetime.datetime.now() - time_tracker
+                    time_per_10000.append(time_taken)
+                    print("Importing Data; Currently on ballot number: ", line_count, time_taken)
+                    time_tracker = datetime.datetime.now()
             if ind0 == 0 and row_raw == [] or row_raw[:4] == ["","","","",""]:
                 line_count -= 1
             if ind0 % 50 == 0:
@@ -76,20 +88,26 @@ def open_import_file(filename, sample_grouping = "None", file_grouping ="Togethe
     print("ENDING AT DATETIME: ", end)
     print("TOTAL TIME: ", change)
     print("TOTAL CELLS PROCESSED: ", all_cells)
-    write_to_log(change, all_cells, len(all_votes), len(race_line), sample_grouping, file_grouping, suspend_undervote, filename, output_file_name)
+    write_to_log(change, all_cells, len(all_votes), len(race_line), sample_grouping, file_grouping, suspend_undervote, filename, output_file_name, start, end)
     return
 
-def write_to_log(total_time, total_cells, number_ballots, number_columns, sample_grouping, file_grouping, suspend_undervote, filename, output_file_name):
+def write_to_log(total_time, total_cells, number_ballots, number_columns, sample_grouping, file_grouping, suspend_undervote, filename, output_file_name, start_time, end_time):
+    global time_per_10000
+    global races_only
     print("Writing Report Info to Log.")
     log = []
     with open("RCV_Checker_Log.csv") as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         for line in csv_reader:
-            log.append(line)
-    if len(log) == 0:
-        log.append(["Total Time", "Total Cells", "Number of Ballots", "Number of Columns", "Sample Grouping", "File Grouping", "Suspend Undervote?", "Input File Name", "output_file_name"])
-    log.append([total_time, total_cells, number_ballots, number_columns, sample_grouping, file_grouping, suspend_undervote, filename, output_file_name])
-    with open("RCV_Checker_Log.csv", 'w') as f:
+            if line != []:
+                log.append(line)
+    print("Imported Log: ", log)
+    log.append(["Total Time", "Total Cells", "Number of Ballots", "Number of Columns", "Sample Grouping", "File Grouping", "Suspend Undervote?", "Input File Name", "output_file_name", "Start DateTime", "End DateTime", "Number of Races"])
+    log.append([total_time, total_cells, number_ballots, number_columns, sample_grouping, file_grouping, suspend_undervote, filename, output_file_name, start_time, end_time, len(races_only)])
+    log.append(["Time Taken Per 10,000 Votes Imported: "] + time_per_10000)
+    log.append(["-","-","-","-","-","-","-","-","-","-","-","-"])
+    print("LOG", log)
+    with open("RCV_Checker_Log.csv", 'w', newline = '') as f:
         # using csv.writer method from CSV package
         write = csv.writer(f)
         write.writerows(log)
@@ -99,7 +117,6 @@ def write_exported_file(export_report, output_file_name):
     with open(output_file_name + ".csv", 'w', newline='') as f:
       # using csv.writer method from CSV package
       write = csv.writer(f)
-      print("EXPORT REPORT: ", export_report)
       write.writerows(export_report)
     return
 
@@ -108,9 +125,9 @@ input = [race_line, candidate_line, all_votes]
 
 def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, report_grouping = "None", file_grouping="Together", export_report_name="RCV_Report", suspend_undervote="False"):
     print("Race Data is being grouped and consolidated...")
-    races_only = check_races(race_line)
-    races_with_info = check_rounds(races_only, candidate_line)
-    for race in races_only:
+    races_only1 = check_races(race_line)
+    races_with_info = check_rounds(races_only1, candidate_line)
+    for race in races_only1:
         update_root()
         if file_grouping == "Separate":
             clear_export_report()
@@ -218,6 +235,7 @@ def run_rcv_for_one_race_sample(race_from_races, race_ballots, sample_details_ra
 
 def check_races(race_line):
     """Outputs Dictionary where races["specific race"] = ["first index of race", "last index of race"] from race_line list"""
+    global races_only
     races = {}
     start_index = 99999
     current_race = ""
@@ -233,6 +251,7 @@ def check_races(race_line):
             else:
                 races[current_race] = [start_index, ind - 1]
                 current_race = race
+                races_only.append(race)
                 start_index = ind
     return races
 
@@ -692,4 +711,3 @@ def new_processing_frame():
 
 
 root.mainloop()
-
