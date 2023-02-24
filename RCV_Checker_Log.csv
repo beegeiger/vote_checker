@@ -31,3 +31,11 @@ Total Time,Total Cells,Number of Ballots,Number of Columns,Sample Grouping,File 
 0:01:02.747436,4916093,55237,89,Batch,Together,False,C:/Users/dbgeiger/OneDrive - Alameda County/Documents/GitHub/vote_checker/Test Data/TEST_EXAMPLE_VCR_INPUT.csv,TEST_OUTPUT_Race_and_Batch,2023-02-23 12:37:03.413245,2023-02-23 12:38:06.160681,2
 "Time Taken Per 10,000 Votes Imported: ",0:00:00.831890,0:00:03.548046,0:00:05.703902,0:00:21.767372,0:00:18.951291
 -,-,-,-,-,-,-,-,-,-,-,-
+Total Time,Total Cells,Number of Ballots,Number of Columns,Sample Grouping,File Grouping,Suspend Undervote?,Input File Name,output_file_name,Start DateTime,End DateTime,Number of Races
+0:00:04.409509,6329736,15864,399,None,Together,False,C:/Users/dbgeiger/OneDrive - Alameda County/Desktop/Test Files/TEST_16th.csv,RCV_Output_Report,2023-02-23 14:14:42.704473,2023-02-23 14:14:47.113982,18
+"Time Taken Per 10,000 Votes Imported: ",0:00:01.076284
+-,-,-,-,-,-,-,-,-,-,-,-
+Total Time,Total Cells,Number of Ballots,Number of Columns,Sample Grouping,File Grouping,Suspend Undervote?,Input File Name,output_file_name,Start DateTime,End DateTime,Number of Races
+0:00:00.188799,0,0,0,None,Together,False,C:/Users/dbgeiger/OneDrive - Alameda County/Documents/GitHub/vote_checker/Test Data/TEST_EXAMPLE_VCR_INPUT.csv,RCV_Output_Report,2023-02-23 14:31:34.679445,2023-02-23 14:31:34.868244,0
+"Time Taken Per 10,000 Votes Imported: "
+-,-,-,-,-,-,-,-,-,-,-,-

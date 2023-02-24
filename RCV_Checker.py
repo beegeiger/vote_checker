@@ -43,7 +43,8 @@ def open_import_file(filename, sample_grouping = "None", file_grouping ="Togethe
         csv_reader = csv.reader(csv_file, delimiter=',')
         line_count = 0
         start_index = 0
-        for ind0, row_raw in enumerate(csv_reader):
+        for ind0, row_raw_original in enumerate(csv_reader):
+            row_raw = list(row_raw_original)
             if line_count % 1000 == 0 and line_count > 0:
                 if line_count < 9500:
                     print("Importing Data; Currently on ballot number: ", line_count)
@@ -107,7 +108,7 @@ def write_to_log(total_time, total_cells, number_ballots, number_columns, sample
     log.append([total_time, total_cells, number_ballots, number_columns, sample_grouping, file_grouping, suspend_undervote, filename, output_file_name, start_time, end_time, len(races_only)])
     log.append(["Time Taken Per 10,000 Votes Imported: "] + time_per_10000)
     log.append(["-","-","-","-","-","-","-","-","-","-","-","-"])
-    print("LOG", log)
+    # print("LOG", log)
     with open("RCV_Checker_Log.csv", 'w', newline = '') as f:
         # using csv.writer method from CSV package
         write = csv.writer(f)
@@ -155,7 +156,7 @@ def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_im
     if file_grouping == "Together":
         write_exported_file(export_report, export_report_name)
     print("THE ALGORITHM HAS CONCLUDED AND YOUR FILE IS NOW READY!")
-    root.destroy()
+    # root.destroy()
     return export_report
 
 
