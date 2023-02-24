@@ -45,6 +45,10 @@ If the first column is blank for a race, but the race is not blank, the ballot g
 ### 9. Click the "Run Report" Button
 Once it begins, if you close out either window opened by the program, it will kill it and no report will be generated. If you let it run through, depending on the size of your sample, the program will take anywhere from 2 to 20 minutes to complete. Once it does complete, both windows will dissapear and your new report should be in RCV Checker folder where the python script is.
 
+
+
+
+
 How the GUI should look:
 
 ![image](https://user-images.githubusercontent.com/36778471/221251358-c48a9893-d68a-4bad-96b1-985121fd8e13.png)
