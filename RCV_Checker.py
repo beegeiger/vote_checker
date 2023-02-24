@@ -609,7 +609,7 @@ var3 = IntVar(None, 6)
 R6 = Radiobutton(frame, text="Continue Ballot Upon Undervoted Column", variable=var3, value=6)
 R6.pack( anchor = W )
 
-R7 = Radiobutton(frame, text="Suspend Ballot (and the following columns will not count)", variable=var3, value=7)
+R7 = Radiobutton(frame, text="Suspend Ballot (and the following columns will not count) - IN BETA", variable=var3, value=7)
 R7.pack( anchor = W )
 
 
