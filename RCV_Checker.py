@@ -144,7 +144,7 @@ def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_im
     if file_grouping == "Together":
         write_exported_file(export_report, export_report_name)
     print("THE ALGORITHM HAS CONCLUDED AND YOUR FILE IS NOW READY!")
-    # root.destroy()
+    root.destroy()
     return races_only
 
 
