@@ -5,7 +5,6 @@ from tkinter import *
 # import filedialog module
 from tkinter import filedialog
 
-candidate_line =[]
 all_votes = []
 entire_report_import = []
 #ballot_info = [[ballot_id1, precinct1, ballot_batch1], [ballot_id2, precinct2, ballot_batch2]]
@@ -26,8 +25,8 @@ def clear_export_report():
 def open_import_file(filename, sample_grouping = "None", file_grouping ="Together", output_file_name="RCV_Report", suspend_undervote="False"):
     update_root()
     time_tracker = datetime.datetime.now()
-    race_line
-    global candidate_line
+    race_line = []
+    candidate_line =[]
     global all_votes
     global entire_report_import
     global ballot_info
