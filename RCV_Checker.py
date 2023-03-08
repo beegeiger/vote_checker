@@ -5,7 +5,6 @@ from tkinter import *
 # import filedialog module
 from tkinter import filedialog
 
-race_line =[]
 candidate_line =[]
 all_votes = []
 entire_report_import = []
@@ -27,7 +26,7 @@ def clear_export_report():
 def open_import_file(filename, sample_grouping = "None", file_grouping ="Together", output_file_name="RCV_Report", suspend_undervote="False"):
     update_root()
     time_tracker = datetime.datetime.now()
-    global race_line
+    race_line
     global candidate_line
     global all_votes
     global entire_report_import
@@ -123,7 +122,6 @@ def write_exported_file(export_report, output_file_name):
     return
 
 
-input = [race_line, candidate_line, all_votes]
 
 def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, report_grouping = "None", file_grouping="Together", export_report_name="RCV_Report", suspend_undervote="False"):
     print("Race Data is being grouped and consolidated...")
