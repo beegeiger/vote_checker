@@ -6,12 +6,7 @@ from tkinter import *
 from tkinter import filedialog
 
 #ballot_info = [[ballot_id1, precinct1, ballot_batch1], [ballot_id2, precinct2, ballot_batch2]]
-ballot_info = []
-all_races = []
-all_precincts = []
-all_batches = []
-time_per_10000 = []
-races_only = []
+
 
 export_report = []
 tkinter_file_input_name = ""
@@ -27,11 +22,11 @@ def open_import_file(filename, sample_grouping = "None", file_grouping ="Togethe
     candidate_line =[]
     all_votes = []
     entire_report_import = []
-    global ballot_info
-    global all_races
-    global all_precincts
-    global all_batches
-    global time_per_10000
+    ballot_info = []
+    all_races = []
+    all_precincts = []
+    all_batches = []
+    time_per_10000 =[]
     start = datetime.datetime.now()
     print("STARTING AT DATETIME: ", start)
     print("Reading Input File and Compiling Data...")
@@ -79,19 +74,17 @@ def open_import_file(filename, sample_grouping = "None", file_grouping ="Togethe
             line_count += 1
         all_precincts.sort()
         all_batches.sort()
-    run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, sample_grouping, file_grouping, output_file_name, suspend_undervote)
+    races_only = run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, sample_grouping, file_grouping, output_file_name, suspend_undervote)
     end = datetime.datetime.now()
     change = end-start
     all_cells = len(all_votes)*len(race_line)
     print("ENDING AT DATETIME: ", end)
     print("TOTAL TIME: ", change)
     print("TOTAL CELLS PROCESSED: ", all_cells)
-    write_to_log(change, all_cells, len(all_votes), len(race_line), sample_grouping, file_grouping, suspend_undervote, filename, output_file_name, start, end)
+    write_to_log(change, all_cells, len(all_votes), len(race_line), sample_grouping, file_grouping, suspend_undervote, filename, output_file_name, start, end, time_per_10000, races_only)
     return
 
-def write_to_log(total_time, total_cells, number_ballots, number_columns, sample_grouping, file_grouping, suspend_undervote, filename, output_file_name, start_time, end_time):
-    global time_per_10000
-    global races_only
+def write_to_log(total_time, total_cells, number_ballots, number_columns, sample_grouping, file_grouping, suspend_undervote, filename, output_file_name, start_time, end_time, time_per_10000, races_only):
     print("Writing Report Info to Log.")
     log = []
     with open("RCV_Checker_Log.csv") as csv_file:
@@ -122,9 +115,9 @@ def write_exported_file(export_report, output_file_name):
 
 def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, report_grouping = "None", file_grouping="Together", export_report_name="RCV_Report", suspend_undervote="False"):
     print("Race Data is being grouped and consolidated...")
-    races_only1 = check_races(race_line)
-    races_with_info = check_rounds(races_only1, candidate_line)
-    for race in races_only1:
+    all_races_dict, races_only = check_races(race_line)
+    races_with_info = check_rounds(all_races_dict, candidate_line)
+    for race in all_races_dict:
         update_root()
         if file_grouping == "Separate":
             clear_export_report()
@@ -152,7 +145,7 @@ def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_im
         write_exported_file(export_report, export_report_name)
     print("THE ALGORITHM HAS CONCLUDED AND YOUR FILE IS NOW READY!")
     # root.destroy()
-    return export_report
+    return races_only
 
 
 
@@ -212,27 +205,9 @@ def run_rcv_for_one_race_sample(race_from_races, race_ballots, sample_details_ra
 
 
 
-
-# def run_code(race_line, candidate_line, all_votes, entire_report_import, export_report):
-#     races_only = check_races(race_line)
-#     print("1 - races from check races: ", races_only)
-#     races_with_info = check_rounds(races_only, candidate_line)
-#     print("2 - races from check_rounds: ", races_with_info)
-#     race1_ballots = prepare_race_data(races_with_info['Mayor - Oakland '], all_votes)
-#     print("3 - race1 from prepare_race_data: ", race1_ballots[:10])
-#     summed_round = sum_round(races_with_info['Mayor - Oakland '], race1_ballots)
-#     print("4 - summed_round from sum_round: ", summed_round[2:])
-#     post_elimination_round = round_elim(summed_round[1], summed_round[2], summed_round[3], summed_round[4], summed_round[5], True)
-#     print("5 - round after elimination: ", post_elimination_round[1:])
-#     summed_round1 = sum_round(races_with_info['Mayor - Oakland '], post_elimination_round[0], post_elimination_round[1], post_elimination_round[2], post_elimination_round[3])
-#     print("6 - summed_round1 from sum_round: ", summed_round1[2:])
-#     post_elimination_round1 = round_elim(summed_round1[1], summed_round1[2], summed_round1[3], summed_round1[4], summed_round1[5])
-#     print("7 - round after elimination: ", post_elimination_round1[1:])
-#     return
-
 def check_races(race_line):
     """Outputs Dictionary where races["specific race"] = ["first index of race", "last index of race"] from race_line list"""
-    global races_only
+    races_only = []
     races = {}
     start_index = 99999
     current_race = ""
@@ -250,7 +225,7 @@ def check_races(race_line):
                 current_race = race
                 races_only.append(race)
                 start_index = ind
-    return races
+    return races, races_only
 
 
 
