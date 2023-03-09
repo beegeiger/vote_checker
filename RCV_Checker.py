@@ -87,7 +87,12 @@ def open_import_file(filename, sample_grouping = "None", file_grouping ="Togethe
 def convert_ballots(original_ballot):
     new_ballot = []
     for selection in original_ballot:
-        
+        if selection.count("1") > 1:
+            new_ballot.append("OVER")
+        elif selection.count("1") == 0:
+            new_ballot.append("UNDER")
+        else:
+            new_ballot.append(selection.index("1"))
     return new_ballot
 
 def write_to_log(total_time, total_cells, number_ballots, number_columns, sample_grouping, file_grouping, suspend_undervote, filename, output_file_name, start_time, end_time, time_per_10000, races_only):
