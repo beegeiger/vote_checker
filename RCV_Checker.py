@@ -84,6 +84,12 @@ def open_import_file(filename, sample_grouping = "None", file_grouping ="Togethe
     write_to_log(change, all_cells, len(all_votes), len(race_line), sample_grouping, file_grouping, suspend_undervote, filename, output_file_name, start, end, time_per_10000, races_only)
     return
 
+def convert_ballots(original_ballot):
+    new_ballot = []
+    for selection in original_ballot:
+        
+    return new_ballot
+
 def write_to_log(total_time, total_cells, number_ballots, number_columns, sample_grouping, file_grouping, suspend_undervote, filename, output_file_name, start_time, end_time, time_per_10000, races_only):
     print("Writing Report Info to Log.")
     log = []
