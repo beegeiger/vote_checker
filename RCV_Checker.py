@@ -62,6 +62,7 @@ def open_import_file(filename, sample_grouping = "None", file_grouping ="Togethe
                 all_races_dict, races_only = check_races(race_line)
             elif line_count == 1:
                 candidate_line = row
+                races_with_info = check_rounds(all_races_dict, candidate_line)
             elif line_count > 2 and row_raw[7] != "TOTAL":
                 ballot_id_split = row_raw[4].split("-")
                 # print("BALLOT ID SPLIT: ", ballot_id_split, row_raw[4])
@@ -93,10 +94,10 @@ def convert_ballots(original_ballot):
         if selection.count("1") > 1:
             new_ballot.append("OVER")
         elif selection.count("1") == 0:
-            new_ballot.append("UNDER")
+            new_ballot.append("U")
         else:
             new_ballot.append(selection.index("1"))
-    if new_ballot == ["UNDER", "UNDER", "UNDER", "UNDER", "UNDER"]
+    if new_ballot == ["U", "U", "U", "U", "U"]
         new_ballot = ["BLANK"]
     return new_ballot
 
@@ -266,7 +267,6 @@ def check_rounds(races, candidate_line):
             elif cand == candidate_list[0]:
                 race_round_tracker.append([round_start_index, race_ind - 1])
                 round_start_index = race_ind
-
     return races
 
 def prepare_race_data(race_from_races, all_votes):
