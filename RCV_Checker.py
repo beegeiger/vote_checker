@@ -34,6 +34,8 @@ def open_import_file(filename, sample_grouping = "None", file_grouping ="Togethe
         csv_reader = csv.reader(csv_file, delimiter=',')
         line_count = 0
         start_index = 0
+        all_races_dict = {}
+        races_only = []
         for ind0, row_raw_original in enumerate(csv_reader):
             row_raw = list(row_raw_original)
             if line_count % 1000 == 0 and line_count > 0:
@@ -57,6 +59,7 @@ def open_import_file(filename, sample_grouping = "None", file_grouping ="Togethe
             entire_report_import.append(row_raw)
             if line_count == 0:
                 race_line = row
+                all_races_dict, races_only = check_races(race_line)
             elif line_count == 1:
                 candidate_line = row
             elif line_count > 2 and row_raw[7] != "TOTAL":
@@ -74,7 +77,7 @@ def open_import_file(filename, sample_grouping = "None", file_grouping ="Togethe
             line_count += 1
         all_precincts.sort()
         all_batches.sort()
-    races_only = run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, sample_grouping, file_grouping, output_file_name, suspend_undervote)
+    run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, sample_grouping, file_grouping, output_file_name, suspend_undervote, all_races_dict, races_only)
     end = datetime.datetime.now()
     change = end-start
     all_cells = len(all_votes)*len(race_line)
@@ -93,6 +96,8 @@ def convert_ballots(original_ballot):
             new_ballot.append("UNDER")
         else:
             new_ballot.append(selection.index("1"))
+    if new_ballot == ["UNDER", "UNDER", "UNDER", "UNDER", "UNDER"]
+        new_ballot = ["BLANK"]
     return new_ballot
 
 def write_to_log(total_time, total_cells, number_ballots, number_columns, sample_grouping, file_grouping, suspend_undervote, filename, output_file_name, start_time, end_time, time_per_10000, races_only):
@@ -124,9 +129,8 @@ def write_exported_file(export_report, output_file_name):
 
 
 
-def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, report_grouping = "None", file_grouping="Together", export_report_name="RCV_Report", suspend_undervote="False"):
+def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, report_grouping = "None", file_grouping="Together", export_report_name="RCV_Report", suspend_undervote="False", all_races_dict, races_only):
     print("Race Data is being grouped and consolidated...")
-    all_races_dict, races_only = check_races(race_line)
     races_with_info = check_rounds(all_races_dict, candidate_line)
     for race in all_races_dict:
         update_root()
@@ -156,7 +160,7 @@ def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_im
         write_exported_file(export_report, export_report_name)
     print("THE ALGORITHM HAS CONCLUDED AND YOUR FILE IS NOW READY!")
     root.destroy()
-    return races_only
+    return
 
 
 
