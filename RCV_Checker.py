@@ -74,7 +74,7 @@ def open_import_file(filename, sample_grouping = "None", file_grouping ="Togethe
                     all_precincts.append(row_raw[6])
                 if batch not in all_batches:
                     all_batches.append(batch)
-                all_votes.append([[row_raw[4], row_raw[6], batch], row])
+                all_votes.append([ballot_info, row])
             line_count += 1
         all_precincts.sort()
         all_batches.sort()
@@ -88,9 +88,10 @@ def open_import_file(filename, sample_grouping = "None", file_grouping ="Togethe
     write_to_log(change, all_cells, len(all_votes), len(race_line), sample_grouping, file_grouping, suspend_undervote, filename, output_file_name, start, end, time_per_10000, races_only)
     return
 
-def parse_ballots(races_with_info, row, race_votes_dict = {}):
-    """Input races_with_info = {"race1": [["first index of race", "last index of race"],[cand1, cand2, etc.],[[round1_start_ind, round1_end_ind], [round2_start_ind, round_2_end_ind], etc.], race_name]}"""
-    ballot_info = row[0]
+def parse_ballots(races_with_info, row, ballot_info_raw, race_votes_dict = {}):
+    """Input races_with_info = {"race1": [["first index of race", "last index of race"],[cand1, cand2, etc.],[[round1_start_ind, round1_end_ind], [round2_start_ind, round_2_end_ind], etc.], race_name]}
+    Outputs race_votes_dict = {"race1": [[[ballot_info_precinct1, ballot_info_batch1],[sela1, selb1, selc1, seld1, sele1]], [[ballot_info_precinct2, ballot_info_batch2],[sela2, selb2, selc2, seld2, sele2]]]}"""
+    ballot_info = ballot_info_raw[1:]
     whole_row = row[1]
     race_row = whole_row[race_indexes[0]: race_indexes[1] + 1]
     if race_votes_dict == {}:
@@ -101,6 +102,11 @@ def parse_ballots(races_with_info, row, race_votes_dict = {}):
         start_end_indexs = races_values[0]
         all_rounds_indexes = races_values[2]
         race_cells = row[start_end_indexs[0]: start_end_indexs[1]]
+        for single_round_indexes in all_rounds_indexes:
+            round_values = race_cells[single_round_indexes[0], single_round_indexes[1]]
+            simplified_round = convert_column(round_values)
+            ballot_for_race.append(simplified_round)
+        race_votes_dict[single_race] = race_votes_dict[single_race].append([ballot_info, ballot_for_race])
     return race_votes_dict
 
 def check_races(race_line):
