@@ -88,6 +88,80 @@ def open_import_file(filename, sample_grouping = "None", file_grouping ="Togethe
     write_to_log(change, all_cells, len(all_votes), len(race_line), sample_grouping, file_grouping, suspend_undervote, filename, output_file_name, start, end, time_per_10000, races_only)
     return
 
+def parse_ballots(races_with_info, row, race_votes_dict = {}):
+    ballot_info = row[0]
+    whole_row = row[1]
+    race_row = whole_row[race_indexes[0]: race_indexes[1] + 1]
+    if race_votes_dict == {}:
+        for single_race in races_with_info:
+            race_votes_dict[single_race] = []
+    for single_race in races_with_info:
+
+    return race_votes_dict
+
+def check_races(race_line):
+    """Outputs Dictionary where races["specific race"] = ["first index of race", "last index of race"] from race_line list"""
+    races_only = []
+    races = {}
+    start_index = 99999
+    current_race = ""
+    for ind, column in enumerate(race_line):
+        cell = column.split("(RCV)")
+        race = cell[0]
+        if ind == len(race_line) - 1:
+                races[current_race] = [start_index, ind]
+        elif race != current_race:
+            if current_race=="":
+                current_race = race
+                start_index = ind
+            else:
+                races[current_race] = [start_index, ind - 1]
+                current_race = race
+                races_only.append(race)
+                start_index = ind
+    return races, races_only
+
+def check_rounds(races, candidate_line):
+    """Outputs races = {"race1": [["first index of race", "last index of race"],[cand1, cand2, etc.],[[round1_start_ind, round1_end_ind], [round2_start_ind, round_2_end_ind], etc.], race_name]}"""
+    race_num = 0
+    for race in races:
+        race_num += 1
+        start_ind = races[race][0]
+        last_ind = races[race][1]
+        race_data = candidate_line[start_ind: last_ind + 1]
+        round_break = []
+        candidate_list = []
+        round_start_index = 0
+        race_round_tracker = []
+        for race_ind, cand_cell in enumerate(race_data):
+            cand = cand_cell.split("(")[0]
+            if cand not in candidate_list:
+                candidate_list.append(cand)
+            elif race_ind == len(race_data) - 1:
+                race_round_tracker.append([round_start_index, race_ind])
+                races[race] = [races[race], candidate_list, race_round_tracker, race]
+            elif cand == candidate_list[0]:
+                race_round_tracker.append([round_start_index, race_ind - 1])
+                round_start_index = race_ind
+    return races
+
+def prepare_race_data(race_from_races, all_votes):
+    """Outputs list where each element is a ballot and each element in a ballot list represents a round (which indexes correspond with candidates)"""
+    race_indexes = race_from_races[0]
+    candidates = race_from_races[1]
+    rounds_indexes = race_from_races[2]
+    all_ballots = []
+    for ind, whole_row_info in enumerate(all_votes):
+        ballot_info = whole_row_info[0]
+        whole_row = whole_row_info[1]
+        race_row = whole_row[race_indexes[0]: race_indexes[1] + 1]
+        ballot = []
+        if race_row.count("0") + race_row.count("1") > (len(candidates) * 5) - 3:
+            for round_pair in rounds_indexes:
+                ballot.append(race_row[round_pair[0]: round_pair[1] + 1])
+            all_ballots.append([ballot_info, ballot])
+    return all_ballots
+
 def convert_ballots(original_ballot):
     new_ballot = []
     for selection in original_ballot:
@@ -221,70 +295,12 @@ def run_rcv_for_one_race_sample(race_from_races, race_ballots, sample_details_ra
 
 
 
-def check_races(race_line):
-    """Outputs Dictionary where races["specific race"] = ["first index of race", "last index of race"] from race_line list"""
-    races_only = []
-    races = {}
-    start_index = 99999
-    current_race = ""
-    for ind, column in enumerate(race_line):
-        cell = column.split("(RCV)")
-        race = cell[0]
-        if ind == len(race_line) - 1:
-                races[current_race] = [start_index, ind]
-        elif race != current_race:
-            if current_race=="":
-                current_race = race
-                start_index = ind
-            else:
-                races[current_race] = [start_index, ind - 1]
-                current_race = race
-                races_only.append(race)
-                start_index = ind
-    return races, races_only
 
 
 
-def check_rounds(races, candidate_line):
-    """Outputs races = {"race1": [["first index of race", "last index of race"],[cand1, cand2, etc.],[[round1_start_ind, round1_end_ind], [round2_start_ind, round_2_end_ind], etc.], race_name]}"""
-    race_num = 0
-    for race in races:
-        race_num += 1
-        start_ind = races[race][0]
-        last_ind = races[race][1]
-        race_data = candidate_line[start_ind: last_ind + 1]
-        round_break = []
-        candidate_list = []
-        round_start_index = 0
-        race_round_tracker = []
-        for race_ind, cand_cell in enumerate(race_data):
-            cand = cand_cell.split("(")[0]
-            if cand not in candidate_list:
-                candidate_list.append(cand)
-            elif race_ind == len(race_data) - 1:
-                race_round_tracker.append([round_start_index, race_ind])
-                races[race] = [races[race], candidate_list, race_round_tracker, race]
-            elif cand == candidate_list[0]:
-                race_round_tracker.append([round_start_index, race_ind - 1])
-                round_start_index = race_ind
-    return races
 
-def prepare_race_data(race_from_races, all_votes):
-    """Outputs list where each element is a ballot and each element in a ballot list represents a round (which indexes correspond with candidates)"""
-    race_indexes = race_from_races[0]
-    candidates = race_from_races[1]
-    rounds_indexes = race_from_races[2]
-    all_ballots = []
-    for ind, whole_row_info in enumerate(all_votes):
-        ballot_info = whole_row_info[0]
-        whole_row = whole_row_info[1]
-        race_row = whole_row[race_indexes[0]: race_indexes[1] + 1]
-        ballot = []
-        if race_row.count("0") + race_row.count("1") > (len(candidates) * 5) - 3:
-            for round_pair in rounds_indexes:
-                ballot.append(race_row[round_pair[0]: round_pair[1] + 1])
-            all_ballots.append([ballot_info, ballot])
-    return all_ballots
+
+
 
 def prepare_race_data_by_precinct(all_ballots_from_race, race):
     print("Grouping Data By Precinct for Race: ", race)
