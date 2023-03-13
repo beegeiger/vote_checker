@@ -89,14 +89,18 @@ def open_import_file(filename, sample_grouping = "None", file_grouping ="Togethe
     return
 
 def parse_ballots(races_with_info, row, race_votes_dict = {}):
+    """Input races_with_info = {"race1": [["first index of race", "last index of race"],[cand1, cand2, etc.],[[round1_start_ind, round1_end_ind], [round2_start_ind, round_2_end_ind], etc.], race_name]}"""
     ballot_info = row[0]
     whole_row = row[1]
     race_row = whole_row[race_indexes[0]: race_indexes[1] + 1]
     if race_votes_dict == {}:
         for single_race in races_with_info:
             race_votes_dict[single_race] = []
-    for single_race in races_with_info:
-
+    for single_race, race_values in races_with_info.items():
+        ballot_for_race = []
+        start_end_indexs = races_values[0]
+        all_rounds_indexes = races_values[2]
+        race_cells = row[start_end_indexs[0]: start_end_indexs[1]]
     return race_votes_dict
 
 def check_races(race_line):
@@ -162,18 +166,15 @@ def prepare_race_data(race_from_races, all_votes):
             all_ballots.append([ballot_info, ballot])
     return all_ballots
 
-def convert_ballots(original_ballot):
-    new_ballot = []
-    for selection in original_ballot:
-        if selection.count("1") > 1:
-            new_ballot.append("OVER")
-        elif selection.count("1") == 0:
-            new_ballot.append("U")
-        else:
-            new_ballot.append(selection.index("1"))
-    if new_ballot == ["U", "U", "U", "U", "U"]
-        new_ballot = ["BLANK"]
-    return new_ballot
+def convert_column(original_column):
+    new_column = []
+    if original_column.count("1") > 1:
+        new_column.append("OVER")
+    elif original_column.count("1") == 0:
+        new_column.append("U")
+    else:
+        new_column.append(selection.index("1"))
+    return new_column[0]
 
 def write_to_log(total_time, total_cells, number_ballots, number_columns, sample_grouping, file_grouping, suspend_undervote, filename, output_file_name, start_time, end_time, time_per_10000, races_only):
     print("Writing Report Info to Log.")
