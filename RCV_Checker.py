@@ -103,11 +103,14 @@ def parse_ballots(races_with_info, row, ballot_info_raw, race_votes_dict = {}):
         start_end_indexs = races_values[0]
         all_rounds_indexes = races_values[2]
         race_cells = row[start_end_indexs[0]: start_end_indexs[1]]
-        for single_round_indexes in all_rounds_indexes:
-            round_values = race_cells[single_round_indexes[0], single_round_indexes[1]]
-            simplified_round = convert_column(round_values)
-            ballot_for_race.append(simplified_round)
-        race_votes_dict[single_race] = race_votes_dict[single_race].append([ballot_info, ballot_for_race])
+        if race_cells.count("0") + race_line.count("1") > 0:
+            for single_round_indexes in all_rounds_indexes:
+                round_values = race_cells[single_round_indexes[0], single_round_indexes[1]]
+                simplified_round = convert_column(round_values)
+                ballot_for_race.append(simplified_round)
+            if ballot_for_race == ["U", "U", "U", "U", "U"]:
+                ballot_for_race = ["B"]
+            race_votes_dict[single_race] = race_votes_dict[single_race].append([ballot_info, ballot_for_race])
     return race_votes_dict
 
 def check_races(race_line):
