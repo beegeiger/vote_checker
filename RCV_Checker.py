@@ -18,6 +18,7 @@ def clear_export_report():
 def open_import_file(filename, sample_grouping = "None", file_grouping ="Together", output_file_name="RCV_Report", suspend_undervote="False"):
     update_root()
     time_tracker = datetime.datetime.now()
+    races_votes = {}
     race_line = []
     candidate_line =[]
     all_votes = []
@@ -74,7 +75,7 @@ def open_import_file(filename, sample_grouping = "None", file_grouping ="Togethe
                     all_precincts.append(row_raw[6])
                 if batch not in all_batches:
                     all_batches.append(batch)
-                all_votes.append([ballot_info, row])
+                races_votes = parse_ballots(races_with_info, row, ballot_info, races_votes)
             line_count += 1
         all_precincts.sort()
         all_batches.sort()
