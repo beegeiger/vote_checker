@@ -159,22 +159,7 @@ def check_rounds(races, candidate_line):
                 round_start_index = race_ind
     return races
 
-def prepare_race_data(race_from_races, all_votes):
-    """Outputs list where each element is a ballot and each element in a ballot list represents a round (which indexes correspond with candidates)"""
-    race_indexes = race_from_races[0]
-    candidates = race_from_races[1]
-    rounds_indexes = race_from_races[2]
-    all_ballots = []
-    for ind, whole_row_info in enumerate(all_votes):
-        ballot_info = whole_row_info[0]
-        whole_row = whole_row_info[1]
-        race_row = whole_row[race_indexes[0]: race_indexes[1] + 1]
-        ballot = []
-        if race_row.count("0") + race_row.count("1") > (len(candidates) * 5) - 3:
-            for round_pair in rounds_indexes:
-                ballot.append(race_row[round_pair[0]: round_pair[1] + 1])
-            all_ballots.append([ballot_info, ballot])
-    return all_ballots
+
 
 def convert_column(original_column):
     new_column = []
@@ -217,15 +202,14 @@ def write_exported_file(export_report, output_file_name):
 
 def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, report_grouping = "None", file_grouping="Together", export_report_name="RCV_Report", suspend_undervote="False", all_races_dict, races_only, races_votes):
     print("Race Data is being grouped and consolidated...")
-    races_with_info = check_rounds(all_races_dict, candidate_line)
     for race in all_races_dict:
         update_root()
         if file_grouping == "Separate":
             clear_export_report()
         print("Current Race Being Processed: ", race)
         race_from_races = races_with_info[race]
-        race_ballots = prepare_race_data(race_from_races, all_votes)
         if report_grouping == "None":
+            race_ballots = prepare_race_data(races_votes[race])
             run_rcv_for_one_race_sample(race_from_races, race_ballots, [race, "ALL", "ALL"], suspend_undervote)
         elif report_grouping == "Precinct":
             prepared_precinct_data = prepare_race_data_by_precinct(race_ballots, race)
@@ -309,8 +293,22 @@ def run_rcv_for_one_race_sample(race_from_races, race_ballots, sample_details_ra
 
 
 
-
-
+def prepare_race_data(all_race_votes):
+    """Outputs list where each element is a ballot and each element in a ballot list represents a round (which indexes correspond with candidates)"""
+    race_indexes = race_from_races[0]
+    candidates = race_from_races[1]
+    rounds_indexes = race_from_races[2]
+    all_ballots = []
+    for ind, whole_row_info in enumerate(all_votes):
+        ballot_info = whole_row_info[0]
+        whole_row = whole_row_info[1]
+        race_row = whole_row[race_indexes[0]: race_indexes[1] + 1]
+        ballot = []
+        if race_row.count("0") + race_row.count("1") > (len(candidates) * 5) - 3:
+            for round_pair in rounds_indexes:
+                ballot.append(race_row[round_pair[0]: round_pair[1] + 1])
+            all_ballots.append([ballot_info, ballot])
+    return all_ballots
 
 
 def prepare_race_data_by_precinct(all_ballots_from_race, race):
