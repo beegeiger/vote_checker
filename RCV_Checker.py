@@ -350,44 +350,40 @@ def sum_round(race_from_races, race_votes, round_no = -1, categories = [], elimi
         blank_tracker = 0
         ballot_counted = False
         current_ballot = list(ballot)
-        if ballot == ["BLANK"]:
-            ballot_tracker.append(["BLANK"])
+        if ballot == ["B"]:
+            ballot_tracker.append(["B"])
             vote_tracker[-3] += 1
-        elif ballot == ["EXHAUSTED"]:
-            ballot_tracker.append(["EXHAUSTED"])
+        elif ballot == ["EX"]:
+            ballot_tracker.append(["EX"])
             vote_tracker[-2] += 1
-        elif ballot == ["OVERVOTE"]:
-            ballot_tracker.append(["OVERVOTE"])
+        elif ballot == ["OVER"]:
+            ballot_tracker.append(["OVER"])
             vote_tracker[-1] += 1
-        elif ballot == ["SUSPENDED"]:
-            ballot_tracker.append(["SUSPENDED"])
+        elif ballot == ["SUS"]:
+            ballot_tracker.append(["SUS"])
             suspended_tracker[1] += 1
         else:
             while ballot_counted == False:
                 if current_ballot == []:
                     if blank_tracker == len(ballot):
                         vote_tracker[-3] += 1
-                        ballot_tracker.append(["BLANK"])
+                        ballot_tracker.append(["B"])
                         ballot_counted = True
                     else:
                         vote_tracker[-2] += 1
-                        ballot_tracker.append(["EXHAUSTED"])
+                        ballot_tracker.append(["EX"])
                         ballot_counted = True
-                elif current_ballot[0].count("1") > 1:
-                    vote_tracker[-1] += 1
-                    ballot_tracker.append(["OVERVOTE"])
-                    ballot_counted = True
-                elif current_ballot[0].count("1") == 0:
+                elif current_ballot[0] == "B":
                     if suspended_tracker == ["False"]:
                         blank_tracker += 1
                         current_ballot = current_ballot[1:]
                     else:
-                        ballot_tracker.append(["SUSPENDED"])
+                        ballot_tracker.append(["SUS"])
                         suspended_tracker[0] += 1
                         suspended_tracker[1] += 1
                         ballot_counted = True
                 else:
-                    vote_index = current_ballot[0].index("1")
+                    vote_index = current_ballot[0]
                     if elimination_tracker[vote_index] != "x":
                         vote_tracker[vote_index] += 1
                         ballot_tracker.append(current_ballot)
@@ -427,29 +423,29 @@ def round_elim(ballot_tracker, round_no, categories, elimination_tracker, vote_t
     for ballot in ballot_tracker:
         # print("BALLOT: ", ballot, ballot_tracker)
         ballot_no += 1
-        if ballot == ["EXHAUSTED"] or ballot == ["OVERVOTE"] or ballot == ["BLANK"] or ballot == ["SUSPENDED"]:
+        if ballot == ["EX"] or ballot == ["OVER"] or ballot == ["B"] or ballot == ["SUS"]:
             new_ballot_tracker.append(ballot)
-        elif ballot[0][elim_index] == "1" and ballot[0].count("1") == 1:
+        elif ballot[0] == elim_index:
             current_ballot = ballot[1:]
             ballot_counted = False
             while ballot_counted == False:
                 if current_ballot == []:
                     where_elim_go[-2] += 1
-                    new_ballot_tracker.append(["EXHAUSTED"])
+                    new_ballot_tracker.append(["EX"])
                     ballot_counted = True
-                elif current_ballot[0].count("1") > 1:
+                elif current_ballot[0] == "OVER":
                     where_elim_go[-1] += 1
-                    new_ballot_tracker.append(["OVERVOTE"])
+                    new_ballot_tracker.append(["OVER"])
                     ballot_counted = True
-                elif current_ballot[0].count("1") == 0:
+                elif current_ballot[0] == "U":
                     if suspended_tracker == ["False"]:
                         current_ballot = current_ballot[1:]
                     else:
                         suspended_tracker[0] += 1
-                        new_ballot_tracker.append(["SUSPENDED"])
+                        new_ballot_tracker.append(["SUS"])
                         ballot_counted = True
                 else:
-                    vote_index = current_ballot[0].index("1")
+                    vote_index = current_ballot[0]
                     if elimination_tracker[vote_index] != "x":
                         where_elim_go[vote_index] += 1
                         new_ballot_tracker.append(current_ballot)
