@@ -295,7 +295,7 @@ def prepare_race_data_by_precinct(all_ballots_from_race, race):
     for whole_row_info in all_ballots_from_race:
         ballot_info = whole_row_info[0]
         whole_row = whole_row_info[1]
-        identifier = str(race) + "/" + str(ballot_info[1]) + "/ALL"
+        identifier = str(race) + "/" + str(ballot_info[0]) + "/ALL"
         if identifier not in all_precinct_identifiers:
             all_precinct_identifiers.append(identifier)
         if identifier in ballots_by_precinct:
@@ -312,7 +312,7 @@ def prepare_race_data_by_batch(all_ballots_from_race, race):
     for whole_row_info in all_ballots_from_race:
         ballot_info = whole_row_info[0]
         whole_row = whole_row_info[1]
-        identifier = str(race) + "/ALL/" + str(ballot_info[2])
+        identifier = str(race) + "/ALL/" + str(ballot_info[1])
         if identifier not in all_batch_identifiers:
             all_batch_identifiers.append(identifier)
         if identifier in ballots_by_batch:
