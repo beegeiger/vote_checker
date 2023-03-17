@@ -79,7 +79,7 @@ def open_import_file(filename, sample_grouping = "None", file_grouping ="Togethe
             line_count += 1
         all_precincts.sort()
         all_batches.sort()
-    run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, sample_grouping, file_grouping, output_file_name, suspend_undervote, all_races_dict, races_only, races_votes)
+    run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, all_races_dict, races_only, races_votes, sample_grouping, file_grouping, output_file_name, suspend_undervote)
     end = datetime.datetime.now()
     change = end-start
     all_cells = len(all_votes)*len(race_line)
@@ -200,7 +200,7 @@ def write_exported_file(export_report, output_file_name):
 
 
 
-def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, report_grouping = "None", file_grouping="Together", export_report_name="RCV_Report", suspend_undervote="False", all_races_dict, races_only, races_votes):
+def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, all_races_dict, races_only, races_votes, report_grouping = "None", file_grouping="Together", export_report_name="RCV_Report", suspend_undervote="False"):
     print("Race Data is being grouped and consolidated...")
     for race in all_races_dict:
         update_root()
