@@ -105,13 +105,12 @@ def parse_ballots(races_with_info, row, ballot_info_raw, race_votes_dict = {}):
         if race_cells.count("0") + race_cells.count("1") > 0:
             for single_round_indexes in all_rounds_indexes:
                 round_values = race_cells[single_round_indexes[0]: single_round_indexes[1]]
-                print("ROUND VALUES: ", round_values, single_round_indexes, all_rounds_indexes)
                 simplified_round = convert_column(round_values)
                 ballot_for_race.append(simplified_round)
             if ballot_for_race == ["U", "U", "U", "U", "U"]:
                 ballot_for_race = ["B"]
-            print("TEST: ", race_votes_dict, [ballot_info, ballot_for_race])
-            race_votes_dict[single_race] = race_votes_dict[single_race].append([ballot_info, ballot_for_race])
+            if race_votes_dict[single_race] == []:
+                race_votes_dict[single_race] = [[ballot_info, ballot_for_race]]
     return race_votes_dict
 
 def check_races(race_line):
@@ -124,7 +123,7 @@ def check_races(race_line):
         cell = column.split("(RCV)")
         race = cell[0]
         if ind == len(race_line) - 1:
-                races[current_race] = [start_index, ind]
+                races[current_race] = [start_index, ind + 1]
         elif race != current_race:
             if current_race=="":
                 current_race = race
@@ -143,7 +142,7 @@ def check_rounds(races, candidate_line):
         race_num += 1
         start_ind = races[race][0]
         last_ind = races[race][1]
-        race_data = candidate_line[start_ind: last_ind + 1]
+        race_data = candidate_line[start_ind: last_ind]
         round_break = []
         candidate_list = []
         round_start_index = 0
@@ -153,10 +152,10 @@ def check_rounds(races, candidate_line):
             if cand not in candidate_list:
                 candidate_list.append(cand)
             elif race_ind == len(race_data) - 1:
-                race_round_tracker.append([round_start_index, race_ind])
+                race_round_tracker.append([round_start_index, race_ind + 1])
                 races[race] = [races[race], candidate_list, race_round_tracker, race]
             elif cand == candidate_list[0]:
-                race_round_tracker.append([round_start_index, race_ind - 1])
+                race_round_tracker.append([round_start_index, race_ind])
                 round_start_index = race_ind
     return races
 
@@ -169,7 +168,7 @@ def convert_column(original_column):
     elif original_column.count("1") == 0:
         new_column.append("U")
     else:
-        new_column.append(selection.index("1"))
+        new_column.append(original_column.index("1"))
     return new_column[0]
 
 def write_to_log(total_time, total_cells, number_ballots, number_columns, sample_grouping, file_grouping, suspend_undervote, filename, output_file_name, start_time, end_time, time_per_10000, races_only):
@@ -208,7 +207,7 @@ def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_im
         if file_grouping == "Separate":
             clear_export_report()
         print("Current Race Being Processed: ", race)
-        race_from_races = races_with_info[race]
+        race_from_races = all_races_dict[race]
         if report_grouping == "None":
             run_rcv_for_one_race_sample(race_from_races, races_votes[race], [race, "ALL", "ALL"], suspend_undervote)
         elif report_grouping == "Precinct":
