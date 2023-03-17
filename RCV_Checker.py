@@ -94,22 +94,23 @@ def parse_ballots(races_with_info, row, ballot_info_raw, race_votes_dict = {}):
     Outputs race_votes_dict = {"race1": [[[ballot_info_precinct1, ballot_info_batch1],[sela1, selb1, selc1, seld1, sele1]], [[ballot_info_precinct2, ballot_info_batch2],[sela2, selb2, selc2, seld2, sele2]]]}"""
     ballot_info = ballot_info_raw[1:]
     whole_row = row[1]
-    race_row = whole_row[race_indexes[0]: race_indexes[1] + 1]
     if race_votes_dict == {}:
         for single_race in races_with_info:
             race_votes_dict[single_race] = []
-    for single_race, race_values in races_with_info.items():
+    for single_race, races_values in races_with_info.items():
         ballot_for_race = []
         start_end_indexs = races_values[0]
         all_rounds_indexes = races_values[2]
         race_cells = row[start_end_indexs[0]: start_end_indexs[1]]
-        if race_cells.count("0") + race_line.count("1") > 0:
+        if race_cells.count("0") + race_cells.count("1") > 0:
             for single_round_indexes in all_rounds_indexes:
-                round_values = race_cells[single_round_indexes[0], single_round_indexes[1]]
+                round_values = race_cells[single_round_indexes[0]: single_round_indexes[1]]
+                print("ROUND VALUES: ", round_values, single_round_indexes, all_rounds_indexes)
                 simplified_round = convert_column(round_values)
                 ballot_for_race.append(simplified_round)
             if ballot_for_race == ["U", "U", "U", "U", "U"]:
                 ballot_for_race = ["B"]
+            print("TEST: ", race_votes_dict, [ballot_info, ballot_for_race])
             race_votes_dict[single_race] = race_votes_dict[single_race].append([ballot_info, ballot_for_race])
     return race_votes_dict
 
