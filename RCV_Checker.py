@@ -107,7 +107,7 @@ def parse_ballots(races_with_info, row, ballot_info_raw, race_votes_dict = {}):
                 round_values = race_cells[single_round_indexes[0]: single_round_indexes[1]]
                 simplified_round = convert_column(round_values)
                 ballot_for_race.append(simplified_round)
-            if ballot_for_race == ["U", "U", "U", "U", "U"]:
+            if ballot_for_race == ["U", "U", "U", "U", "U"] or ballot_for_race.count("U") == len(ballot_for_race) and len(ballot_for_race) > 3:
                 ballot_for_race = ["B"]
             if race_votes_dict[single_race] == []:
                 race_votes_dict[single_race] = [[ballot_info, ballot_for_race]]
@@ -373,7 +373,7 @@ def sum_round(race_from_races, race_votes, round_no = -1, categories = [], elimi
                         vote_tracker[-2] += 1
                         ballot_tracker.append(["EX"])
                         ballot_counted = True
-                elif current_ballot[0] == "B":
+                elif current_ballot[0] == "U":
                     if suspended_tracker == ["False"]:
                         blank_tracker += 1
                         current_ballot = current_ballot[1:]
@@ -383,6 +383,7 @@ def sum_round(race_from_races, race_votes, round_no = -1, categories = [], elimi
                         suspended_tracker[1] += 1
                         ballot_counted = True
                 else:
+                    print("CURRENT BALLOT: ", current_ballot)
                     vote_index = current_ballot[0]
                     if elimination_tracker[vote_index] != "x":
                         vote_tracker[vote_index] += 1
