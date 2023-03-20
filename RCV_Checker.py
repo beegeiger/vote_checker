@@ -615,6 +615,7 @@ def submit_input():
     # print("VAR: ", var, var2, var.get(), var2.get())
     # print("INPUT FILE NAME: ", tkinter_file_input_name)
     input_file_input_raw = tkinter_file_input_name
+    print("INPUT NAME:", input_file_input_raw)
     # input_raw_list = input_file_input_raw.split(":")
     # input_raw_list2 = input_raw_list[1].split("/")
     # input_file_input = input_raw_list2[-1]
