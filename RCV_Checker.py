@@ -192,6 +192,8 @@ def write_to_log(total_time, total_cells, number_ballots, number_columns, sample
     return
 
 def write_exported_file(export_report, output_file_name):
+    global tkinter_file_input_name
+    file_list = tkinter_file_input_name.split("\")
     with open(output_file_name + ".csv", 'w', newline='') as f:
       # using csv.writer method from CSV package
       write = csv.writer(f)
