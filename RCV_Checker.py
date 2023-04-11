@@ -18,7 +18,6 @@ def clear_export_report():
 def open_import_file(filename, sample_grouping = "None", file_grouping ="Together", output_file_name="RCV_Report", suspend_undervote="False"):
     update_root()
     time_tracker = datetime.datetime.now()
-    races_votes = {}
     race_line = []
     candidate_line =[]
     all_votes = []
@@ -35,8 +34,6 @@ def open_import_file(filename, sample_grouping = "None", file_grouping ="Togethe
         csv_reader = csv.reader(csv_file, delimiter=',')
         line_count = 0
         start_index = 0
-        all_races_dict = {}
-        races_only = []
         for ind0, row_raw_original in enumerate(csv_reader):
             row_raw = list(row_raw_original)
             if line_count % 1000 == 0 and line_count > 0:
@@ -60,10 +57,8 @@ def open_import_file(filename, sample_grouping = "None", file_grouping ="Togethe
             entire_report_import.append(row_raw)
             if line_count == 0:
                 race_line = row
-                all_races_dict, races_only = check_races(race_line)
             elif line_count == 1:
                 candidate_line = row
-                races_with_info = check_rounds(all_races_dict, candidate_line)
             elif line_count > 2 and row_raw[7] != "TOTAL":
                 ballot_id_split = row_raw[4].split("-")
                 # print("BALLOT ID SPLIT: ", ballot_id_split, row_raw[4])
@@ -75,11 +70,11 @@ def open_import_file(filename, sample_grouping = "None", file_grouping ="Togethe
                     all_precincts.append(row_raw[6])
                 if batch not in all_batches:
                     all_batches.append(batch)
-                races_votes = parse_ballots(races_with_info, row, ballot_info, races_votes)
+                all_votes.append([[row_raw[4], row_raw[6], batch], row])
             line_count += 1
         all_precincts.sort()
         all_batches.sort()
-    run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, all_races_dict, races_only, races_votes, sample_grouping, file_grouping, output_file_name, suspend_undervote)
+    races_only = run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, sample_grouping, file_grouping, output_file_name, suspend_undervote)
     end = datetime.datetime.now()
     change = end-start
     all_cells = len(all_votes)*len(race_line)
@@ -88,88 +83,6 @@ def open_import_file(filename, sample_grouping = "None", file_grouping ="Togethe
     print("TOTAL CELLS PROCESSED: ", all_cells)
     write_to_log(change, all_cells, len(all_votes), len(race_line), sample_grouping, file_grouping, suspend_undervote, filename, output_file_name, start, end, time_per_10000, races_only)
     return
-
-def parse_ballots(races_with_info, row, ballot_info_raw, race_votes_dict = {}):
-    """Input races_with_info = {"race1": [["first index of race", "last index of race"],[cand1, cand2, etc.],[[round1_start_ind, round1_end_ind], [round2_start_ind, round_2_end_ind], etc.], race_name]}
-    Outputs race_votes_dict = {"race1": [[[ballot_info_precinct1, ballot_info_batch1],[sela1, selb1, selc1, seld1, sele1]], [[ballot_info_precinct2, ballot_info_batch2],[sela2, selb2, selc2, seld2, sele2]]]}"""
-    ballot_info = ballot_info_raw[1:]
-    whole_row = row[1]
-    if race_votes_dict == {}:
-        for single_race in races_with_info:
-            race_votes_dict[single_race] = []
-    for single_race, races_values in races_with_info.items():
-        ballot_for_race = []
-        start_end_indexs = races_values[0]
-        all_rounds_indexes = races_values[2]
-        race_cells = row[start_end_indexs[0]: start_end_indexs[1]]
-        if race_cells.count("0") + race_cells.count("1") > 0:
-            for single_round_indexes in all_rounds_indexes:
-                round_values = race_cells[single_round_indexes[0]: single_round_indexes[1]]
-                simplified_round = convert_column(round_values)
-                ballot_for_race.append(simplified_round)
-            if ballot_for_race == ["U", "U", "U", "U", "U"] or ballot_for_race.count("U") == len(ballot_for_race) and len(ballot_for_race) > 3:
-                ballot_for_race = ["B"]
-            if race_votes_dict[single_race] == []:
-                race_votes_dict[single_race] = [[ballot_info, ballot_for_race]]
-    return race_votes_dict
-
-def check_races(race_line):
-    """Outputs Dictionary where races["specific race"] = ["first index of race", "last index of race"] from race_line list"""
-    races_only = []
-    races = {}
-    start_index = 99999
-    current_race = ""
-    for ind, column in enumerate(race_line):
-        cell = column.split("(RCV)")
-        race = cell[0]
-        if ind == len(race_line) - 1:
-                races[current_race] = [start_index, ind + 1]
-        elif race != current_race:
-            if current_race=="":
-                current_race = race
-                start_index = ind
-            else:
-                races[current_race] = [start_index, ind - 1]
-                current_race = race
-                races_only.append(race)
-                start_index = ind
-    return races, races_only
-
-def check_rounds(races, candidate_line):
-    """Outputs races = {"race1": [["first index of race", "last index of race"],[cand1, cand2, etc.],[[round1_start_ind, round1_end_ind], [round2_start_ind, round_2_end_ind], etc.], race_name]}"""
-    race_num = 0
-    for race in races:
-        race_num += 1
-        start_ind = races[race][0]
-        last_ind = races[race][1]
-        race_data = candidate_line[start_ind: last_ind]
-        round_break = []
-        candidate_list = []
-        round_start_index = 0
-        race_round_tracker = []
-        for race_ind, cand_cell in enumerate(race_data):
-            cand = cand_cell.split("(")[0]
-            if cand not in candidate_list:
-                candidate_list.append(cand)
-            elif race_ind == len(race_data) - 1:
-                race_round_tracker.append([round_start_index, race_ind + 1])
-                races[race] = [races[race], candidate_list, race_round_tracker, race]
-            elif cand == candidate_list[0]:
-                race_round_tracker.append([round_start_index, race_ind])
-                round_start_index = race_ind
-    return races
-
-
-
-def convert_column(original_column):
-    new_column = []
-    if original_column.count("1") > 1:
-        new_column.append("OVER")
-    elif original_column.count("1") == 0:
-        new_column.append("U")
-    else:
-        new_column.append(original_column.index("1"))
-    return new_column[0]
 
 def write_to_log(total_time, total_cells, number_ballots, number_columns, sample_grouping, file_grouping, suspend_undervote, filename, output_file_name, start_time, end_time, time_per_10000, races_only):
     print("Writing Report Info to Log.")
@@ -192,8 +105,6 @@ def write_to_log(total_time, total_cells, number_ballots, number_columns, sample
     return
 
 def write_exported_file(export_report, output_file_name):
-    global tkinter_file_input_name
-    file_list = tkinter_file_input_name.split("")
     with open(output_file_name + ".csv", 'w', newline='') as f:
       # using csv.writer method from CSV package
       write = csv.writer(f)
@@ -202,16 +113,19 @@ def write_exported_file(export_report, output_file_name):
 
 
 
-def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, all_races_dict, races_only, races_votes, report_grouping = "None", file_grouping="Together", export_report_name="RCV_Report", suspend_undervote="False"):
+def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_import, report_grouping = "None", file_grouping="Together", export_report_name="RCV_Report", suspend_undervote="False"):
     print("Race Data is being grouped and consolidated...")
+    all_races_dict, races_only = check_races(race_line)
+    races_with_info = check_rounds(all_races_dict, candidate_line)
     for race in all_races_dict:
         update_root()
         if file_grouping == "Separate":
             clear_export_report()
         print("Current Race Being Processed: ", race)
-        race_from_races = all_races_dict[race]
+        race_from_races = races_with_info[race]
+        race_ballots = prepare_race_data(race_from_races, all_votes)
         if report_grouping == "None":
-            run_rcv_for_one_race_sample(race_from_races, races_votes[race], [race, "ALL", "ALL"], suspend_undervote)
+            run_rcv_for_one_race_sample(race_from_races, race_ballots, [race, "ALL", "ALL"], suspend_undervote)
         elif report_grouping == "Precinct":
             prepared_precinct_data = prepare_race_data_by_precinct(race_ballots, race)
             race_ballots_by_precinct = prepared_precinct_data[0]
@@ -231,7 +145,7 @@ def run_rcv_entire_report(race_line, candidate_line, all_votes, entire_report_im
         write_exported_file(export_report, export_report_name)
     print("THE ALGORITHM HAS CONCLUDED AND YOUR FILE IS NOW READY!")
     root.destroy()
-    return
+    return races_only
 
 
 
@@ -290,6 +204,73 @@ def run_rcv_for_one_race_sample(race_from_races, race_ballots, sample_details_ra
     return
 
 
+
+def check_races(race_line):
+    """Outputs Dictionary where races["specific race"] = ["first index of race", "last index of race"] from race_line list"""
+    races_only = []
+    races = {}
+    start_index = 99999
+    current_race = ""
+    for ind, column in enumerate(race_line):
+        cell = column.split("(RCV)")
+        race = cell[0]
+        if ind == len(race_line) - 1:
+                races[current_race] = [start_index, ind]
+        elif race != current_race:
+            if current_race=="":
+                current_race = race
+                start_index = ind
+            else:
+                races[current_race] = [start_index, ind - 1]
+                current_race = race
+                races_only.append(race)
+                start_index = ind
+    return races, races_only
+
+
+
+def check_rounds(races, candidate_line):
+    """Outputs races = {"race1": [["first index of race", "last index of race"],[cand1, cand2, etc.],[[round1_start_ind, round1_end_ind], [round2_start_ind, round_2_end_ind], etc.], race_name]}"""
+    race_num = 0
+    for race in races:
+        race_num += 1
+        start_ind = races[race][0]
+        last_ind = races[race][1]
+        race_data = candidate_line[start_ind: last_ind + 1]
+        round_break = []
+        candidate_list = []
+        round_start_index = 0
+        race_round_tracker = []
+        for race_ind, cand_cell in enumerate(race_data):
+            cand = cand_cell.split("(")[0]
+            if cand not in candidate_list:
+                candidate_list.append(cand)
+            elif race_ind == len(race_data) - 1:
+                race_round_tracker.append([round_start_index, race_ind])
+                races[race] = [races[race], candidate_list, race_round_tracker, race]
+            elif cand == candidate_list[0]:
+                race_round_tracker.append([round_start_index, race_ind - 1])
+                round_start_index = race_ind
+
+    return races
+
+def prepare_race_data(race_from_races, all_votes):
+    """Outputs list where each element is a ballot and each element in a ballot list represents a round (which indexes correspond with candidates)"""
+    race_indexes = race_from_races[0]
+    candidates = race_from_races[1]
+    rounds_indexes = race_from_races[2]
+    all_ballots = []
+    for ind, whole_row_info in enumerate(all_votes):
+        ballot_info = whole_row_info[0]
+        whole_row = whole_row_info[1]
+        race_row = whole_row[race_indexes[0]: race_indexes[1] + 1]
+        ballot = []
+        if race_row.count("0") + race_row.count("1") > (len(candidates) * 5) - 3:
+            for round_pair in rounds_indexes:
+                ballot.append(race_row[round_pair[0]: round_pair[1] + 1])
+            all_ballots.append([ballot_info, ballot])
+    return all_ballots
+
 def prepare_race_data_by_precinct(all_ballots_from_race, race):
     print("Grouping Data By Precinct for Race: ", race)
     ballots_by_precinct = {}
@@ -297,7 +278,7 @@ def prepare_race_data_by_precinct(all_ballots_from_race, race):
     for whole_row_info in all_ballots_from_race:
         ballot_info = whole_row_info[0]
         whole_row = whole_row_info[1]
-        identifier = str(race) + "/" + str(ballot_info[0]) + "/ALL"
+        identifier = str(race) + "/" + str(ballot_info[1]) + "/ALL"
         if identifier not in all_precinct_identifiers:
             all_precinct_identifiers.append(identifier)
         if identifier in ballots_by_precinct:
@@ -314,7 +295,7 @@ def prepare_race_data_by_batch(all_ballots_from_race, race):
     for whole_row_info in all_ballots_from_race:
         ballot_info = whole_row_info[0]
         whole_row = whole_row_info[1]
-        identifier = str(race) + "/ALL/" + str(ballot_info[1])
+        identifier = str(race) + "/ALL/" + str(ballot_info[2])
         if identifier not in all_batch_identifiers:
             all_batch_identifiers.append(identifier)
         if identifier in ballots_by_batch:
@@ -352,41 +333,44 @@ def sum_round(race_from_races, race_votes, round_no = -1, categories = [], elimi
         blank_tracker = 0
         ballot_counted = False
         current_ballot = list(ballot)
-        if ballot == ["B"]:
-            ballot_tracker.append(["B"])
+        if ballot == ["BLANK"]:
+            ballot_tracker.append(["BLANK"])
             vote_tracker[-3] += 1
-        elif ballot == ["EX"]:
-            ballot_tracker.append(["EX"])
+        elif ballot == ["EXHAUSTED"]:
+            ballot_tracker.append(["EXHAUSTED"])
             vote_tracker[-2] += 1
-        elif ballot == ["OVER"]:
-            ballot_tracker.append(["OVER"])
+        elif ballot == ["OVERVOTE"]:
+            ballot_tracker.append(["OVERVOTE"])
             vote_tracker[-1] += 1
-        elif ballot == ["SUS"]:
-            ballot_tracker.append(["SUS"])
+        elif ballot == ["SUSPENDED"]:
+            ballot_tracker.append(["SUSPENDED"])
             suspended_tracker[1] += 1
         else:
             while ballot_counted == False:
                 if current_ballot == []:
                     if blank_tracker == len(ballot):
                         vote_tracker[-3] += 1
-                        ballot_tracker.append(["B"])
+                        ballot_tracker.append(["BLANK"])
                         ballot_counted = True
                     else:
                         vote_tracker[-2] += 1
-                        ballot_tracker.append(["EX"])
+                        ballot_tracker.append(["EXHAUSTED"])
                         ballot_counted = True
-                elif current_ballot[0] == "U":
+                elif current_ballot[0].count("1") > 1:
+                    vote_tracker[-1] += 1
+                    ballot_tracker.append(["OVERVOTE"])
+                    ballot_counted = True
+                elif current_ballot[0].count("1") == 0:
                     if suspended_tracker == ["False"]:
                         blank_tracker += 1
                         current_ballot = current_ballot[1:]
                     else:
-                        ballot_tracker.append(["SUS"])
+                        ballot_tracker.append(["SUSPENDED"])
                         suspended_tracker[0] += 1
                         suspended_tracker[1] += 1
                         ballot_counted = True
                 else:
-                    print("CURRENT BALLOT: ", current_ballot)
-                    vote_index = current_ballot[0]
+                    vote_index = current_ballot[0].index("1")
                     if elimination_tracker[vote_index] != "x":
                         vote_tracker[vote_index] += 1
                         ballot_tracker.append(current_ballot)
@@ -426,29 +410,29 @@ def round_elim(ballot_tracker, round_no, categories, elimination_tracker, vote_t
     for ballot in ballot_tracker:
         # print("BALLOT: ", ballot, ballot_tracker)
         ballot_no += 1
-        if ballot == ["EX"] or ballot == ["OVER"] or ballot == ["B"] or ballot == ["SUS"]:
+        if ballot == ["EXHAUSTED"] or ballot == ["OVERVOTE"] or ballot == ["BLANK"] or ballot == ["SUSPENDED"]:
             new_ballot_tracker.append(ballot)
-        elif ballot[0] == elim_index:
+        elif ballot[0][elim_index] == "1" and ballot[0].count("1") == 1:
             current_ballot = ballot[1:]
             ballot_counted = False
             while ballot_counted == False:
                 if current_ballot == []:
                     where_elim_go[-2] += 1
-                    new_ballot_tracker.append(["EX"])
+                    new_ballot_tracker.append(["EXHAUSTED"])
                     ballot_counted = True
-                elif current_ballot[0] == "OVER":
+                elif current_ballot[0].count("1") > 1:
                     where_elim_go[-1] += 1
-                    new_ballot_tracker.append(["OVER"])
+                    new_ballot_tracker.append(["OVERVOTE"])
                     ballot_counted = True
-                elif current_ballot[0] == "U":
+                elif current_ballot[0].count("1") == 0:
                     if suspended_tracker == ["False"]:
                         current_ballot = current_ballot[1:]
                     else:
                         suspended_tracker[0] += 1
-                        new_ballot_tracker.append(["SUS"])
+                        new_ballot_tracker.append(["SUSPENDED"])
                         ballot_counted = True
                 else:
-                    vote_index = current_ballot[0]
+                    vote_index = current_ballot[0].index("1")
                     if elimination_tracker[vote_index] != "x":
                         where_elim_go[vote_index] += 1
                         new_ballot_tracker.append(current_ballot)
@@ -617,7 +601,6 @@ def submit_input():
     # print("VAR: ", var, var2, var.get(), var2.get())
     # print("INPUT FILE NAME: ", tkinter_file_input_name)
     input_file_input_raw = tkinter_file_input_name
-    print("INPUT NAME:", input_file_input_raw)
     # input_raw_list = input_file_input_raw.split(":")
     # input_raw_list2 = input_raw_list[1].split("/")
     # input_file_input = input_raw_list2[-1]
